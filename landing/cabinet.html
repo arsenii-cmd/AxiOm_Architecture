@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Личный кабинет — AxiOm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0D1B2A; --bg-soft:#122438; --bg-card:#16273f; --line:#1c3050; --line-2:#233a5e;
+    --blue:#1E90FF; --blue-soft:#3da4ff; --green:#00C853; --orange:#FF8A3D;
+    --ink:#E8EEF8; --dim:#6A7B98; --very-dim:#3a4a66;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:"Inter",sans-serif;font-weight:300;
+       min-height:100vh;-webkit-font-smoothing:antialiased;padding:0 20px 60px;position:relative;overflow-x:hidden}
+  /* живой «aurora»-градиент (как в hero лендинга) + точечная сетка поверх */
+  body::before{content:"";position:fixed;inset:-20% -10%;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(40% 30% at 22% 26%, rgba(61,164,255,0.20), transparent 60%),
+      radial-gradient(35% 26% at 80% 68%, rgba(30,144,255,0.15), transparent 60%),
+      radial-gradient(28% 20% at 55% 48%, rgba(0,200,83,0.07), transparent 65%);
+    filter:blur(34px);animation:auroraDrift 22s ease-in-out infinite alternate}
+  body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:radial-gradient(circle,rgba(61,164,255,.05) 1px,transparent 1px);background-size:32px 32px}
+  @keyframes auroraDrift{
+    0%{transform:translate(0,0) scale(1)}
+    33%{transform:translate(-40px,26px) scale(1.06)}
+    66%{transform:translate(36px,-20px) scale(.97)}
+    100%{transform:translate(0,0) scale(1)}}
+  @media (prefers-reduced-motion: reduce){ body::before{animation:none} }
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--dim)}
+  .mono.accent{color:var(--blue-soft)}
+
+  .nav{position:sticky;top:0;z-index:50;margin:0 -20px 0;padding:0 20px;
+       background:rgba(13,27,42,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+       border-bottom:.5px solid var(--line)}
+  .nav-inner{max-width:860px;margin:0 auto;padding:16px 4px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .brand{display:flex;align-items:center;gap:11px;font-size:19px;font-weight:400;letter-spacing:-.4px}
+  .brand .o{color:var(--blue-soft);font-weight:500}
+  .nav-actions{display:flex;gap:10px;align-items:center}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
+       padding:9px 15px;border:.5px solid var(--line-2);border-radius:6px;background:var(--bg-soft);
+       color:var(--ink);font-family:"Inter",sans-serif;font-size:13px;font-weight:500;transition:all .15s;white-space:nowrap}
+  .btn:hover{border-color:var(--blue-soft);background:var(--bg-card)}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn.primary:hover{background:var(--blue-soft)}
+
+  .wrap{position:relative;z-index:1;max-width:860px;margin:0 auto}
+  .head{padding:40px 4px 22px}
+  .eyebrow{margin-bottom:12px}
+  h1{font-size:38px;font-weight:200;letter-spacing:-1.4px;line-height:1}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:18px}
+  .sub{background:linear-gradient(180deg,#182b48 0%,var(--bg-card) 70%);border:.5px solid var(--line);
+       border-radius:14px;padding:26px 24px;position:relative;overflow:hidden}
+  .sub.active{border-color:rgba(0,200,83,.4)}
+  .sub.active::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;
+       background:linear-gradient(90deg,var(--green),transparent)}
+  .sub-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .sub-name{font-size:21px;font-weight:300;letter-spacing:-.5px;line-height:1.15}
+  .chip{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
+        padding:5px 9px;border-radius:4px;border:.5px solid;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+  .chip .dot{width:6px;height:6px;border-radius:50%}
+  .chip.active{color:var(--green);border-color:var(--green)}
+  .chip.active .dot{background:var(--green);animation:dotPulse 1.8s ease-in-out infinite}
+  @keyframes dotPulse{
+    0%,100%{box-shadow:0 0 3px var(--green);opacity:.8}
+    50%{box-shadow:0 0 9px var(--green);opacity:1}}
+  .chip.other{color:var(--orange);border-color:var(--orange)} .chip.other .dot{background:var(--orange)}
+
+  .stats{display:flex;gap:28px;margin:22px 0 18px;padding-top:18px;border-top:.5px solid var(--line)}
+  .stat .k{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+  .stat .v{font-size:34px;font-weight:200;letter-spacing:-1px;line-height:1}
+  .stat .v small{font-size:13px;color:var(--dim);font-weight:400;letter-spacing:0;margin-left:4px}
+  .bar{height:4px;border-radius:3px;background:var(--bg);overflow:hidden;margin-top:10px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--blue-soft))}
+
+  .link-row{margin-top:8px}
+  .link-cap{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+  .sub-link{font-family:"JetBrains Mono",monospace;font-size:12px;word-break:break-all;color:var(--blue-soft);
+            background:var(--bg);border:.5px solid var(--line);border-radius:8px;padding:11px 12px;line-height:1.5}
+  .copy{cursor:pointer;color:var(--blue-soft);font-size:12px;margin-top:10px;display:inline-flex;gap:6px;align-items:center;
+        font-family:"JetBrains Mono",monospace;letter-spacing:1px}
+  .copy:hover{color:var(--ink)}
+
+  .state{grid-column:1/-1;text-align:center;color:var(--dim);padding:64px 16px;font-size:15px;font-weight:300}
+  .state .btn{margin-top:20px;display:inline-flex;width:auto}
+  .refbox{margin-top:24px;background:linear-gradient(135deg,rgba(61,164,255,.06),transparent 55%),var(--bg-card);
+          border:.5px solid var(--line);border-radius:14px;padding:24px}
+  .refbox h2{font-size:17px;font-weight:500;letter-spacing:-.2px;margin-bottom:6px}
+  .refbox p{color:var(--dim);font-size:13px;line-height:1.55;margin-bottom:16px}
+  .refbox .code{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .refbox .code b{font-family:"JetBrains Mono",monospace;font-size:22px;letter-spacing:3px;color:var(--blue-soft);
+                  background:var(--bg);border:.5px solid var(--line);border-radius:8px;padding:8px 16px}
+  .refbox .reflabel{margin:18px 0 8px;color:var(--dim);font-size:13px}
+  @media(max-width:520px){ h1{font-size:30px} .grid{grid-template-columns:1fr} .nav-actions .label{display:none} }
+
+  /* движение: плавное появление элементов + живые ховеры */
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .head,.sub,.refbox{animation:riseIn .55s cubic-bezier(.22,.61,.36,1) both}
+  .grid .sub:nth-child(2){animation-delay:.07s}
+  .grid .sub:nth-child(3){animation-delay:.13s}
+  .grid .sub:nth-child(4){animation-delay:.19s}
+  .grid .sub:nth-child(n+5){animation-delay:.24s}
+  .refbox{animation-delay:.15s}
+  .sub,.refbox{transition:border-color .25s,box-shadow .25s}
+  /* ховер: неактивная подписка — синий; активная и «Пригласи друга» — зелёный */
+  .sub:hover{border-color:var(--blue-soft);box-shadow:0 22px 54px rgba(0,0,0,.42),0 0 0 1px rgba(61,164,255,.30)}
+  .sub.active:hover,.refbox:hover{border-color:var(--green);box-shadow:0 22px 54px rgba(0,0,0,.42),0 0 0 1px rgba(0,200,83,.38)}
+  .btn:hover{transform:translateY(-1px)} .btn:active{transform:translateY(0)}
+  @media (prefers-reduced-motion: reduce){
+    .head,.sub,.refbox{animation:none} .btn:hover{transform:none}
+    .chip.active .dot{animation:none;box-shadow:0 0 6px var(--green)}
+  }
+</style>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/">
+        <svg viewBox="0 0 100 100" width="25" height="25" aria-hidden="true">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#3da4ff" stroke-width="2"/>
+          <ellipse cx="50" cy="50" rx="19" ry="46" fill="none" stroke="#3da4ff" stroke-width="0.9" opacity="0.55"/>
+          <line x1="4" y1="50" x2="96" y2="50" stroke="#3da4ff" stroke-width="0.9" opacity="0.4"/>
+          <text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="Inter, sans-serif" font-weight="500" font-size="58" fill="#3da4ff">Ω</text>
+        </svg>
+        <span>Axi<span class="o">Ω</span>m</span>
+      </a>
+      <div class="nav-actions">
+        <a class="btn" href="/">← <span class="label">На главную</span></a>
+        <a class="btn primary" href="/#pricing">Купить ещё</a>
+        <button class="btn" id="logoutBtn">Выйти</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow mono accent">AxiOm · аккаунт</div>
+      <h1>Личный кабинет</h1>
+    </div>
+    <div class="grid" id="content"><div class="state">Загрузка…</div></div>
+    <div id="refBox" class="refbox" style="display:none"></div>
+  </div>
+
+<script>
+  function fmtGB(b){ if(!b) return '0'; return (b/1073741824).toFixed(b<10737418240?2:1); }
+  function daysLeft(expire){
+    if(!expire) return '∞';
+    const d = Math.floor((expire - Date.now()/1000)/86400); // floor, как bot.days_left
+    return d > 0 ? d : 0;
+  }
+  function st(s){ return s === 'active' ? 'active' : 'other'; }
+  function stLabel(s){ return ({active:'активна',expired:'истекла',limited:'лимит',disabled:'выкл',on_hold:'ожидание'})[s] || (s||'—'); }
+
+  function render(data){
+    const c = document.getElementById('content');
+    const subs = data.subscriptions || [];
+
+    // блок реферального кода (показываем всегда, даже без подписок)
+    if(data.referral_code){
+      const rb = document.getElementById('refBox');
+      rb.style.display = 'block';
+      rb.innerHTML = '<h2>🎟 Пригласи друга</h2>'
+        + '<p>Друг вводит твой код в поле промокода при покупке — за первую покупку бонус получите '
+        + 'оба: +7 дней за месячный тариф, +30 за годовой.</p>'
+        + '<div class="code"><b>'+data.referral_code+'</b>'
+        + '<span class="copy" data-copy="'+data.referral_code+'">⧉ скопировать код</span></div>'
+        + (data.referral_link ? (
+            '<p class="reflabel">Или поделись ссылкой на бота — друг попадёт в него уже привязанным:</p>'
+          + '<div class="sub-link">'+data.referral_link+'</div>'
+          + '<span class="copy" data-copy="'+data.referral_link+'">⧉ скопировать ссылку</span>'
+          ) : '');
+      rb.querySelectorAll('.copy').forEach(el => el.addEventListener('click', function(){
+        navigator.clipboard.writeText(this.dataset.copy).then(()=>{
+          const t=this.textContent; this.textContent='✓ скопировано'; setTimeout(()=>this.textContent=t,1500);
+        });
+      }));
+    }
+
+    if(!subs.length){
+      c.innerHTML = '<div class="state">У тебя пока нет активных подписок.<br>'
+        + '<a class="btn primary" href="/#pricing">Выбрать тариф</a></div>';
+      return;
+    }
+    c.innerHTML = subs.map(s=>{
+      const used = +fmtGB(s.used_traffic);
+      const unlimited = !s.data_limit;
+      const limit = unlimited ? '∞' : fmtGB(s.data_limit);
+      const pct = unlimited ? 0 : Math.min(100, Math.round((s.used_traffic||0)/s.data_limit*100));
+      const bar = unlimited ? '' : '<div class="bar"><i style="width:'+pct+'%"></i></div>';
+      return '<div class="sub '+(s.status==='active'?'active':'')+'">'
+        + '<div class="sub-top"><div class="sub-name">'+(s.tariff||'Подписка')+'</div>'
+        +   '<span class="chip '+st(s.status)+'"><span class="dot"></span>'+stLabel(s.status)+'</span></div>'
+        + '<div class="stats">'
+        +   '<div class="stat"><div class="k">осталось</div><div class="v">'+daysLeft(s.expire)+'<small>дней</small></div></div>'
+        +   '<div class="stat" style="flex:1"><div class="k">трафик</div>'
+        +     '<div class="v">'+used+'<small>/ '+limit+(unlimited?'':' ГБ')+'</small></div>'+bar+'</div>'
+        + '</div>'
+        + '<div class="link-row"><div class="link-cap">ссылка подписки</div>'
+        +   '<div class="sub-link">'+s.sub_url+'</div>'
+        +   '<span class="copy" data-copy="'+s.sub_url+'">⧉ скопировать</span></div>'
+        + '</div>';
+    }).join('');
+    c.querySelectorAll('.copy').forEach(el=>el.addEventListener('click',()=>{
+      navigator.clipboard.writeText(el.dataset.copy).then(()=>{
+        const t=el.textContent; el.textContent='✓ скопировано';
+        setTimeout(()=>el.textContent=t,1500);
+      });
+    }));
+  }
+
+  fetch('/api/web/me',{credentials:'include'})
+    .then(r=>{ if(r.status===401){ window.location.href='/login'; throw 'noauth'; } return r.json(); })
+    .then(render)
+    .catch(e=>{ if(e!=='noauth') document.getElementById('content').innerHTML=
+      '<div class="state">Не удалось загрузить кабинет. Обнови страницу.</div>'; });
+
+  document.getElementById('logoutBtn').addEventListener('click',()=>{
+    fetch('/api/web/logout',{method:'POST',credentials:'include'}).finally(()=>window.location.href='/');
+  });
+</script>
+</body>
+</html>

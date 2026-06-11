@@ -1,0 +1,195 @@
+# AxiOm — состояние системы после переезда на Marzneshin
+
+> Актуально на **08.06.2026**. Единый источник истины по тому, **что есть сейчас**
+> после миграции с Marzban на Marzneshin. Секреты тут не хранятся (пароли/ключи/токены —
+> в `.env` на серверах и в авто-памяти).
+>
+> Исторические документы плана/обкатки (`MIGRATION_MARZNESHIN.md`, `Marzneshin_Phase1_Report.md`,
+> `SESSION_LOG_Marzneshin_Migration.md`) удалены — миграция завершена, их содержимое
+> законсервировано здесь в актуальном виде.
+
+---
+
+## 1. Итог одной строкой
+
+VPN-инфраструктура переведена с **Marzban** на **Marzneshin**. Боевой бот продаж,
+лимитер устройств и клиентские подписки работают на новой панели. Старый Marzban оставлен
+**остановленным как откат** (панель на NL ещё жива, ноды Marzban погашены).
+
+---
+
+## 2. Панель и ноды
+
+**Панель Marzneshin — на FR** (`IP_FR`), домен `fr.DOMAIN`.
+Локальная нода FR: `INSECURE=True`, backend `grpcio`. Удалённые ноды — `grpclib` (TLS), порт `53042`.
+⚠️ **Фаервол (10.06.2026):** на NL/PL/RU `53042/tcp` закрыт для всех, кроме IP панели FR
+(`iptables -I INPUT ! -s IP_FR/32 -p tcp --dport 53042 -j DROP`). Персист: NL/PL —
+`netfilter-persistent` (`/etc/iptables/rules.v4`); RU — юнит `axiom-firewall.service` (oneshot,
+iptables-persistent на RU не стоит). Новой ноде правило надо ставить вручную при добавлении.
+
+| Нода | IP | backend | Протоколы | Статус |
+|---|---|---|---|---|
+| France (local) | IP_FR | grpcio | VLESS WS + Reality + HY2 | healthy |
+| Poland | IP_PL | grpclib | VLESS WS + Reality + HY2 | healthy |
+| Netherlands | IP_NL | grpclib | VLESS WS + Reality + HY2 | healthy |
+| Russia | IP_RU | grpclib | **только VLESS WS** | healthy |
+
+**Инбаунды** (12 = 4 ноды × 3): VLESS_WS / VLESS_Reality / HY2 на каждой (на RU Reality/HY2 отключены).
+
+**Сервисы Marzneshin:**
+- **Standard** (id=1) — VLESS Reality на FR/PL/NL (без RU).
+- **Maximum** (id=2) — VLESS WS + Reality + HY2 на FR/PL/NL + **VLESS WS на RU**.
+
+**Почему RU только WS:** умная маршрутизация .ru заворачивает ответы с публичного IP в
+WG-туннель на NL → Reality/HY2 (особенно UDP) ломаются асимметрией; WS идёт через Cloudflare и работает.
+
+**HY2:** UDP `9444`, TLS (Let's Encrypt `fr.DOMAIN`) + обфускация Salamander.
+⚠️ Готч: рестарт удалённой marznode теряет sing-box (HY2) юзеров — восстанавливает только
+рестарт самой панели `docker restart marzneshin-marzneshin-1` на FR (~30с).
+
+**Админы панели (все sudo):** `admin` (исходный), `V3IPLimit` (лимитер), `API_USER` (бот/скрипты).
+
+---
+
+## 3. Бот продаж — на Marzneshin (прод)
+
+Боевой `vpn-bot.service` на **RU** (`IP_RU`, SSH `:2222`) переведён на Marzneshin API
+(cutover 08.06.2026). Каталог `/opt/vpn-bot`.
+
+**Ключевые отличия Marzneshin (учтены в коде):**
+1. **Username → нижний регистр** при создании. Генерация имён в боте — сразу `.lower()`.
+2. **Нет поля `status`** (как в Marzban). `_normalize_user()` синтезирует его из
+   `is_active`/`expired`/`enabled`/`data_limit_reached`.
+3. **expire** через `expire_strategy=fixed_date` + `expire_date` (ISO, naive UTC), а не unix.
+4. **Инбаунды → `service_ids`**: `_tariff_to_service_ids()` — есть `VLESS WS` в тарифе → `[2]`
+   (Maximum), иначе `[1]` (Standard).
+5. Поиск юзеров — параметр `username` (не `search`). Подписка — абсолютный `subscription_url` из ответа.
+
+**Имена функций сохранены** (`get_marzban_user`, `get_marzban_users`, `create_user`,
+`renew_user`, `delete_user`, …) — внутри ходят на Marzneshin. `bot.db` и **столбец
+`marzban_username` оставлены как есть** (бизнес-логика/история не переписывалась).
+
+**Тарифы** (в `config.py`, бизнес-обёртки над 2 сервисами) — без изменений:
+4 «Стандарт» (→ Standard), 4 «Максимальный» + триал (→ Maximum). Цены/сроки/лимиты устройств/трафик
+сохранены 1:1; лимит устройств ставится через device-API V3IpLimit.
+
+**Веб-покупки (лендинг + Платёжка), фиксы 10.06.2026:**
+- Реферальный бонус теперь начисляется и на **платных** веб-покупках (`web_api.py`: `referrer_id`
+  передаётся в `save_web_payment` на платном пути; раньше — только при 100%-промо).
+- Гонка «webhook + опрос статуса» разведена CAS: `db.claim_web_issue()` атомарно `pending → issuing`,
+  второй вызов не дублирует создание юзера (раньше ловил 409), а ждёт результат; при ошибке
+  платёж возвращается в `pending` для повтора.
+
+**Маппинг API Marzban → Marzneshin:**
+
+| Операция | Marzban | Marzneshin |
+|---|---|---|
+| Auth | `POST /api/admin/token` | `POST /api/admins/token` (form) |
+| Get user | `GET /api/user/{u}` | `GET /api/users/{u}` |
+| List | `GET /api/users` | `GET /api/users?page=&size=` |
+| Create | `POST /api/user` | `POST /api/users` |
+| Update | `PUT /api/user/{u}` | `PUT /api/users/{u}` (username в теле!) |
+| Delete | `DELETE /api/user/{u}` | `DELETE /api/users/{u}` |
+| Reset traffic | `POST /api/user/{u}/reset` | `POST /api/users/{u}/reset` |
+| Enable | — (поле status) | `POST /api/users/{u}/enable` |
+| Срок | `expire` (unix) | `expire_strategy` + `expire_date` (ISO) |
+| Инбаунды | `inbounds:{vless:[…]}` | `service_ids:[1,2]` |
+
+---
+
+## 4. V3IpLimit (лимит устройств) — на Marzneshin, мульти-нодовый
+
+Боевой лимитер/счётчик устройств — **на FR** (`fr.DOMAIN/devices`).
+Считает онлайн-IP по access-логам Xray **и** sing-box (HY2), окно скользящее.
+
+**Мульти-нодовый подсчёт без cross-SSH:** на каждой ноде `log-forwarder.service` тейлит
+`/var/lib/marznode/access.log` + sing-box лог и **пушит** новые строки на FR
+`POST /devices/api/ingest` → один и тот же парсер агрегирует IP по ВСЕМ нодам (глобальный лимит).
+
+**API (используется ботом и приложением):**
+`GET /devices/api/devices/{username|token}?key=` → `{connected, limit}`
+(поле `ips` убрано из ответа 10.06.2026 — ключ зашит в клиент, список IP всех юзеров был утечкой;
+бот/приложение используют только `connected`/`limit`). Проверка ключа — `hmac.compare_digest`.
+`POST /devices/api/set_limit` (персональный лимит); `GET /devices/health`; `POST /devices/api/ingest`.
+Резолв `{token}`: `_build_response` приводит username к `.lower()` — старые Marzban-токены
+кодируют исходный регистр (`Arco`), а счёт идёт по lowercase (`arco`); без нормализации
+давало `connected:0`.
+
+**Мост `/devices` на NL → FR:** в Caddy на NL `handle /devices/* → https://fr.DOMAIN`
+(`header_up Host`). Выпущенные сборки приложения раньше ходили на NL — после остановки старого
+лимитера это сломалось; мост чинит их без пересборки. ⚠️ **Мост не убирать**, пока не все клиенты
+обновлены на FR-сборку.
+
+Старый лимитер эпохи Marzban (`v3iplimit.service` на NL + телеграм-бот `@IPLIMIT_BOT`) —
+**остановлен и отключён** (тейлил логи Marzban-нод, больше не нужен).
+
+**Ключ device-API** (`DEVICE_API_KEY`) в коде НЕ хранится — `api/rest_api.py` читает его из env.
+На FR задаётся в `/opt/v3iplimit/.env` (chmod 600, `EnvironmentFile=` в systemd-юните). Тот же
+ключ — в `.env` бота (`V2IPLIMIT_API_KEY`) и в клиенте `device_count_provider.dart`.
+⚠️ Значение присутствует в git-истории до 08.06.2026 → при необходимости полной безопасности
+ключ стоит **ротировать** во всех трёх местах.
+
+---
+
+## 5. Непрерывность старых ссылок (шим-редирект)
+
+Старая ссылка Marzban (`vpn.DOMAIN/sub/{token}`) ≠ Marzneshin
+(`fr.DOMAIN/sub/{user}/{key}`). Мост — `sub-redirect.service` на **NL** (`:8011`):
+декодит username из токена → `.lower()` → есть в Marzneshin? **302** на новый sub : иначе
+fallthrough-прокси на Marzban `:8000` (fail-safe). Caddy NL: `handle /sub/* → 127.0.0.1:8011`
+перед catch-all. Клиент (302-follow) сам подтягивает новый конфиг → **переустановка не нужна**.
+
+⚠️ **Caddy + `sub-redirect.service` на NL обязаны оставаться живыми**, даже когда погасим панель
+Marzban — иначе старые ссылки перестанут редиректиться.
+
+---
+
+## 6. Миграция пользователей — выполнена
+
+Скрипт `_node_template/migrate_user.py` (лежит на NL как `/opt/migrate_user.py`): читает юзера
+Marzban (API sudo `migrator`, фолбэк SQLite) → маппит inbounds→service (Reality→1 / WS+Reality→2) →
+создаёт в Marzneshin `username.lower()` → переносит expire (`None`→`never`, не +30 дней!) /
+data_limit / персональный IP-лимит (из старого `/root/config.json` `SPECIAL_LIMIT`). Идемпотентен (409).
+`used_traffic` НЕ переносится. `bot.db` НЕ трогает.
+
+**Все живые (не истёкшие) юзеры перенесены** и проверены (service_ids, срок, лимиты). При cutover
+бота `bot.db` единоразово приведён к нижнему регистру:
+`UPDATE subscriptions SET marzban_username=lower(...)` (+ в pending/web_payments/web_trials).
+
+---
+
+## 7. Что осталось из старого Marzban
+
+| Что | Где | Статус |
+|---|---|---|
+| Панель Marzban | NL `marzban-marzban-1` | **Up** (намеренно — откат + fallthrough шима) |
+| marzban-node | PL, RU | Exited (остановлены 08.06) |
+| marzban-node | FR `marzban-node-marzban-node-1` | **Up** (остаток старой схемы, не используется — кандидат на `docker stop`, ест память на самом нагруженном сервере) |
+| `v3iplimit.service` + `@IPLIMIT_BOT` | NL | inactive + disabled |
+| `vpn-bot-test.service` | RU | inactive (тестовый инстанс, не нужен) |
+| `/var/lib/marzban/db.sqlite3` | NL | цел (нужен пока панель жива) |
+
+**Активно из старого — только панель Marzban на NL.** Всё остальное на новом стеке или остановлено.
+
+### План полного вывода Marzban (когда будешь готов)
+1. Грейс-период ~1–2 недели с живой панелью + шимом.
+2. Остановить панель Marzban на NL (`docker compose stop`), **Caddy + шим оставить**.
+3. Бэкап `db.sqlite3`, затем удалить: остановленные marzban-node (PL/RU/FR), `vpn-bot-test` (RU),
+   старый `/opt/v3iplimit` (NL).
+4. (Опц.) убрать `@IPLIMIT_BOT` в BotFather.
+
+---
+
+## 8. Клиент AxiOm v2
+
+Добавлен каскадный селектор Страна → **Протокол** (VLESS/Hysteria2) → Транспорт.
+Парсер remark: `^(.*?)\s*\([^)]*\)\s*\[([a-z0-9]+)\]\s*$`; токен → `ws`=VLESS/WS, `tcp`=VLESS/Reality,
+`hy2`=Hysteria2. **Сервер виден в селекторе только если remark = `<АнглСтрана> (текст) [ws|tcp|hy2]`.**
+
+**Счётчик устройств (08.06):** `device_count_provider.dart` `_baseUrl` → `fr.DOMAIN/devices`;
+ключ передаётся при сборке `--dart-define=DEVICE_API_KEY=<key>` (в коде не хранится — иначе счётчик
+скрыт). Пересобраны **v2 Android (split-per-abi APK) + Windows** с ключом. Репо клиента —
+`github.com/arsenii-cmd/AxiOm-v2` (ветка `master`).
+
+Осталось: **раздать новую сборку** пользователям (до этого старые установки работают через
+Caddy-мост `/devices` на NL).

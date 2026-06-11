@@ -1,0 +1,20 @@
+# Нормализация переводов строк: в репозитории всегда LF, чтобы работа из Windows
+# не плодила фантомные диффы (CRLF-шум), за которым тонут реальные изменения.
+* text=auto eol=lf
+
+# Windows-скрипты обязаны оставаться CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Бинарные файлы — не трогать
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.db binary
+*.sqlite3 binary

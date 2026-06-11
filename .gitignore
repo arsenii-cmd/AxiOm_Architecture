@@ -1,0 +1,27 @@
+# Секреты и живые данные — НИКОГДА не коммитить
+PLACEHOLDERS.md
+.env
+.env.*
+*.env
+bot.db
+bot.db-*
+*.sqlite
+*.sqlite3
+config.json
+config.json.bak*
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Локальные бэкапы / снапшоты / черновики
+bak-*
+*.bak
+*.bak.*
+_patch_*.py
+*.output
+
+# Операционный скрипт миграции с секретами в дефолтах — не коммитить
+migrate_user.py

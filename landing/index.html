@@ -1,0 +1,3856 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AxiΩm — Свобода аксиома.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0D1B2A;
+    --bg-soft:   #122438;
+    --bg-card:   #16273f;
+    --line:      #1c3050;
+    --line-2:   #2a426b;
+    --blue:      #1E90FF;
+    --blue-soft: #3da4ff;
+    --green:     #00C853;
+    --orange:    #FF8A3D;
+    --tg:        #229ED9;
+    --tg-soft:   #4ab4e6;
+    --ink:       #E8EEF8;
+    --dim:       #6A7B98;
+    --very-dim:  #3a4a66;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", sans-serif;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 50px; }
+  a { color: inherit; text-decoration: none; }
+
+  /* monospace caption */
+  .mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .mono.accent { color: var(--blue-soft); }
+
+  /* faint dotted grid behind content */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: radial-gradient(circle, rgba(61,164,255,0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .wrap, .nav, .footer-wrap { position: relative; z-index: 1; }
+
+  /* ─────────── NAV ─────────── */
+  .nav {
+    position: sticky; top: 0;
+    z-index: 50;
+    background: rgba(13, 27, 42, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 0.5px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 18px 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.4px;
+  }
+  .nav-brand .o { color: var(--blue-soft); font-weight: 500; }
+  .nav-brand .mark {
+    width: 28px; height: 28px;
+    display: inline-flex;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+  }
+  .nav-links a {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+    transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px;
+    border: 0.5px solid var(--line-2);
+    border-radius: 6px;
+    font-family: "Inter", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    background: var(--bg-soft);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--blue-soft); background: var(--bg-card); }
+  .btn.primary {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+  .btn.primary:hover { background: var(--blue-soft); }
+  .btn .arr { font-family: "JetBrains Mono", monospace; font-size: 13px; }
+
+  /* ─────────── HERO ─────────── */
+  .hero {
+    padding: 100px 0 80px;
+    position: relative;
+    border-bottom: 0.5px solid var(--line);
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-left .eyebrow {
+    margin-bottom: 24px;
+  }
+  .hero-headline {
+    font-size: 108px;
+    font-weight: 200;
+    letter-spacing: -4px;
+    line-height: 0.98;
+    margin: 0 0 28px;
+    color: var(--ink);
+  }
+  .hero-headline em {
+    font-style: normal;
+    color: var(--blue-soft);
+    font-weight: 300;
+  }
+  .hero-lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--dim);
+    max-width: 540px;
+    margin-bottom: 36px;
+  }
+  .hero-lede b { color: var(--ink); font-weight: 400; }
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .hero-meta {
+    margin-top: 28px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding-top: 24px;
+    border-top: 0.5px solid var(--line);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1px;
+  }
+  .hero-meta b { color: var(--green); font-weight: 500; }
+  .hero-meta b::before {
+    content: "● ";
+    color: var(--green);
+    text-shadow: 0 0 6px var(--green);
+  }
+
+  /* hero mark — wireframe Ω sphere with subtle glow */
+  .hero-mark {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1;
+    max-width: 480px;
+    margin-left: auto;
+  }
+  .hero-mark::before {
+    content: "";
+    position: absolute;
+    inset: 8%;
+    background: radial-gradient(circle, rgba(61,164,255,0.18) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-mark svg { width: 100%; height: 100%; position: relative; }
+
+  /* ─────────── STATS BAR ─────────── */
+  .stats {
+    padding: 36px 0;
+    border-bottom: 0.5px solid var(--line);
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat {
+    padding: 0 32px;
+    border-right: 0.5px solid var(--line);
+  }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child  { border-right: none; padding-right: 0; }
+  .stat-num {
+    font-size: 42px;
+    font-weight: 200;
+    letter-spacing: -1.2px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-num .u {
+    font-size: 14px;
+    color: var(--dim);
+    font-weight: 400;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+  .stat-label {
+    margin-top: 10px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  /* ─────────── SECTION ─────────── */
+  .section {
+    padding: 100px 0;
+    border-bottom: 0.5px solid var(--line);
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 18px;
+    border-bottom: 0.5px solid var(--line);
+  }
+  .section-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue-soft);
+  }
+  .section-title {
+    font-size: 52px;
+    font-weight: 200;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin: 0;
+  }
+  .section-title em { font-style: normal; color: var(--blue-soft); font-weight: 300; }
+  .section-sub {
+    margin-top: 10px;
+    font-size: 16px;
+    color: var(--dim);
+    max-width: 600px;
+  }
+
+  /* ─── feature grid (под капотом) ─── */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: 0.5px solid var(--line);
+    border-left: 0.5px solid var(--line);
+  }
+  .feat {
+    padding: 32px 28px;
+    border-right: 0.5px solid var(--line);
+    border-bottom: 0.5px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 280px;
+  }
+  .feat .feat-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--blue-soft);
+    text-transform: uppercase;
+  }
+  .feat .feat-title {
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.6px;
+    color: var(--ink);
+    margin: 4px 0 6px;
+  }
+  .feat .feat-body {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--dim);
+    flex: 1;
+  }
+  .feat .feat-mono {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--blue-soft);
+    padding-top: 14px;
+    border-top: 0.5px dashed var(--line-2);
+  }
+
+  /* ─── RU server callout ─── */
+  .ru {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 0.5px solid var(--line);
+    overflow: hidden;
+  }
+  .ru-left {
+    padding: 56px 48px;
+    background: linear-gradient(135deg, #182b48 0%, var(--bg-card) 100%);
+    position: relative;
+  }
+  .ru-left::after {
+    content: "RU";
+    position: absolute;
+    bottom: -40px; right: -40px;
+    font-size: 320px;
+    font-weight: 200;
+    color: rgba(61,164,255,0.04);
+    line-height: 1;
+    pointer-events: none;
+    letter-spacing: -8px;
+    font-family: "Inter", sans-serif;
+  }
+  .ru-tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue-soft);
+    display: inline-block;
+    padding: 5px 10px;
+    border: 0.5px solid var(--blue-soft);
+    border-radius: 3px;
+    margin-bottom: 20px;
+  }
+  .ru-title {
+    font-size: 40px;
+    font-weight: 200;
+    letter-spacing: -1.2px;
+    line-height: 1.05;
+    margin: 0 0 18px;
+  }
+  .ru-title em { font-style: normal; color: var(--blue-soft); font-weight: 300; }
+  .ru-body {
+    font-size: 15px;
+    color: var(--dim);
+    line-height: 1.6;
+    max-width: 460px;
+  }
+  .ru-body b { color: var(--ink); font-weight: 400; }
+  .ru-right {
+    padding: 56px 48px;
+    background: var(--bg-soft);
+    border-left: 0.5px solid var(--line);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+  }
+  .ru-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .ru-row .ic {
+    color: var(--blue-soft);
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .ru-row .txt {
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .ru-row .txt span { color: var(--dim); }
+
+  /* ─── smart routing diagram ─── */
+  .routing {
+    margin-top: 32px;
+    padding: 36px;
+    background: var(--bg-soft);
+    border: 0.5px solid var(--line);
+    border-radius: 4px;
+  }
+  .routing-title {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 24px;
+  }
+  .routing-flow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+  .route-line {
+    display: grid;
+    grid-template-columns: 130px 1fr 130px;
+    align-items: center;
+    gap: 0;
+  }
+  .route-src, .route-dst {
+    padding: 14px 18px;
+    border: 0.5px solid var(--line-2);
+    border-radius: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px;
+    color: var(--ink);
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  .route-arrow {
+    position: relative;
+    height: 1px;
+    background: var(--line-2);
+  }
+  .route-arrow::after {
+    content: "▶";
+    position: absolute;
+    right: -2px; top: -7px;
+    color: var(--line-2);
+    font-size: 10px;
+  }
+  .route-arrow .label {
+    position: absolute;
+    bottom: 4px; left: 50%;
+    transform: translateX(-50%);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    color: var(--blue-soft);
+    background: var(--bg-soft);
+    padding: 0 8px;
+    white-space: nowrap;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .route-line.direct .route-dst { color: var(--green); border-color: var(--green); }
+  .route-line.direct .route-arrow .label { color: var(--green); }
+  .route-line.tunnel .route-dst { color: var(--blue-soft); border-color: var(--blue-soft); }
+
+  /* ─── countries ─── */
+  .countries {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .country {
+    padding: 22px 20px;
+    background: var(--bg-soft);
+    border: 0.5px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .country .flag {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    flex-shrink: 0;
+    border: 0.5px solid var(--line);
+  }
+  .country .flag > span { flex: 1; height: 100%; display: block; }
+  .country .name {
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 400;
+  }
+  .country .meta {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 3px;
+  }
+
+  /* ─── apps cards ─── */
+  .apps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  .app {
+    padding: 40px 40px 32px;
+    background: var(--bg-card);
+    border: 0.5px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .app.tejar { border-color: rgba(74,180,230,0.3); }
+  .app-mark {
+    width: 100px; height: 100px;
+  }
+  .app-name {
+    font-size: 36px;
+    font-weight: 200;
+    letter-spacing: -1.2px;
+    line-height: 1;
+  }
+  .app-name .o { color: var(--blue-soft); font-weight: 300; }
+  .app.tejar .app-name { color: var(--tg-soft); font-weight: 300; }
+  .app-tag {
+    font-size: 16px;
+    color: var(--ink);
+    margin-top: 6px;
+  }
+  .app-body {
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.6;
+    flex: 1;
+  }
+  .app-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 18px;
+    border-top: 0.5px dashed var(--line-2);
+  }
+  .app-stack span {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blue-soft);
+    padding: 4px 9px;
+    border: 0.5px solid var(--line-2);
+    border-radius: 3px;
+  }
+  .app.tejar .app-stack span { color: var(--tg-soft); }
+
+  /* ─── phone showcase ─── */
+  .phones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 0.5px solid var(--line);
+    align-items: stretch;
+  }
+  .phone-cell {
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    border-right: 0.5px solid var(--line);
+  }
+  .phone-cell:last-child { border-right: none; }
+  .phone-cell.active {
+    background: radial-gradient(circle at 50% 30%, rgba(0,200,83,0.06), transparent 60%);
+  }
+  .phone-img {
+    width: 240px;
+    max-width: 100%;
+    border-radius: 32px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    overflow: hidden;
+    background: #000;
+  }
+  .phone-img img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .phone-cap {
+    text-align: center;
+  }
+  .phone-cap .cap-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 8px;
+  }
+  .phone-cell.active .cap-eyebrow { color: var(--green); }
+  .phone-cap .cap-title {
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: -0.4px;
+  }
+  .phone-cap .cap-body {
+    font-size: 13px;
+    color: var(--dim);
+    margin-top: 4px;
+  }
+
+  /* ─── pricing teaser ─── */
+  .prices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+  .price {
+    padding: 36px 32px;
+    background: var(--bg-card);
+    border: 0.5px solid var(--line);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .price.featured {
+    background: linear-gradient(180deg, #182b48 0%, var(--bg-card) 70%);
+    border-color: var(--blue);
+  }
+  .price.featured::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-soft));
+  }
+  .price-badge {
+    position: absolute;
+    top: 18px; right: 18px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--blue);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 3px;
+  }
+  .price-tier {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .price.featured .price-tier { color: var(--blue-soft); }
+  .price-name {
+    font-size: 30px;
+    font-weight: 300;
+    letter-spacing: -0.8px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .price-num {
+    display: flex; align-items: baseline; gap: 6px;
+    border-top: 0.5px solid var(--line);
+    padding-top: 18px;
+  }
+  .price-num b {
+    font-size: 52px;
+    font-weight: 200;
+    letter-spacing: -1.5px;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .price-num .cur { font-size: 22px; color: var(--ink); font-weight: 300; }
+  .price-num .per {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-left: 4px;
+  }
+  .price-disc {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--green);
+    padding: 3px 7px;
+    border: 0.5px solid var(--green);
+    border-radius: 3px;
+    margin-left: auto;
+    letter-spacing: 1px;
+  }
+  .price-features {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--ink);
+  }
+  .price-features div::before {
+    content: "● ";
+    color: var(--blue-soft);
+    margin-right: 4px;
+  }
+  .price-features .muted { color: var(--dim); }
+
+  /* ─── telegram cluster ─── */
+  .tg-section {
+    background: var(--bg-soft);
+  }
+  .tg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .tg-card {
+    padding: 28px;
+    background: var(--bg-card);
+    border: 0.5px solid var(--line);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .tg-card:hover {
+    border-color: var(--tg-soft);
+    transform: translateY(-2px);
+  }
+  .tg-card .tg-ic {
+    width: 36px; height: 36px;
+    background: var(--tg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tg-card .tg-ic svg { display: block; }
+  .tg-card .tg-role {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .tg-card .tg-handle {
+    font-size: 19px;
+    color: var(--ink);
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+  .tg-card .tg-desc {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.5;
+  }
+  .tg-card .tg-cta {
+    margin-top: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--tg-soft);
+  }
+
+  /* ─── FAQ-ish closing ─── */
+  .closing {
+    padding: 80px 0 100px;
+    text-align: center;
+  }
+  .closing-headline {
+    font-size: 64px;
+    font-weight: 200;
+    letter-spacing: -2.5px;
+    line-height: 1;
+    margin: 0 0 22px;
+  }
+  .closing-headline em { font-style: normal; color: var(--blue-soft); font-weight: 300; }
+  .closing-sub {
+    font-size: 17px;
+    color: var(--dim);
+    max-width: 540px;
+    margin: 0 auto 36px;
+  }
+  .closing-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer-wrap { border-top: 0.5px solid var(--line); padding: 40px 0 50px; background: var(--bg); }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--very-dim);
+  }
+  .footer .brand-blk {
+    font-family: "Inter", sans-serif;
+    font-size: 16px;
+    letter-spacing: -0.4px;
+    text-transform: none;
+    color: var(--ink);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .footer .brand-blk .o { color: var(--blue-soft); font-weight: 500; }
+
+  /* ─── interactive tilt + spotlight ─── */
+  .tilt {
+    position: relative;
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+    transform-style: preserve-3d;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+    will-change: transform;
+  }
+  .tilt::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(circle 240px at var(--mx, 50%) var(--my, 50%),
+                                rgba(61,164,255,0.13), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 1;
+  }
+  .tilt:hover { border-color: var(--blue-soft); }
+  .tilt:hover::after { opacity: 1; }
+  .tilt > * { position: relative; z-index: 2; }
+  .tilt.tilt-tg:hover { border-color: var(--tg-soft); }
+  .tilt.tilt-tg::after {
+    background: radial-gradient(circle 240px at var(--mx, 50%) var(--my, 50%),
+                                rgba(74,180,230,0.16), transparent 55%);
+  }
+
+  /* hero parallax */
+  .hero-mark svg {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: rotateX(var(--hrx, 0deg)) rotateY(var(--hry, 0deg));
+    transform-style: preserve-3d;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tilt, .hero-mark svg { transition: none !important; transform: none !important; }
+    .tilt::after { display: none; }
+  }
+
+  /* ─── INTERACTIVE PHONE SHOWCASE — AxiOm + Tejar ─── */
+  .phones-i {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 80px;
+    align-items: center;
+  }
+  .phone-i-text { max-width: 480px; }
+
+  /* Side info text (shared) */
+  .state-eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 18px;
+    transition: color 0.4s ease;
+  }
+  .state-eyebrow::before {
+    content: "● ";
+    color: var(--blue-soft);
+    margin-right: 4px;
+    transition: color 0.4s ease;
+  }
+  .phones-i[data-state="active"] .state-eyebrow,
+  .phones-i[data-state="active"] .state-eyebrow::before { color: var(--green); }
+  .phones-i.tejar-showcase .state-eyebrow::before { color: var(--tg-soft); }
+  .phones-i.tejar-showcase[data-state="active"] .state-eyebrow,
+  .phones-i.tejar-showcase[data-state="active"] .state-eyebrow::before { color: #5DCAA5; }
+
+  .state-title {
+    font-size: 56px; font-weight: 200;
+    letter-spacing: -2px; line-height: 1;
+    margin-bottom: 22px;
+  }
+  .state-title em { font-style: normal; color: var(--blue-soft); font-weight: 300; transition: color 0.4s ease; }
+  .phones-i[data-state="active"] .state-title em { color: var(--green); }
+  .phones-i.tejar-showcase .state-title em { color: var(--tg-soft); }
+  .phones-i.tejar-showcase[data-state="active"] .state-title em { color: #5DCAA5; }
+
+  .state-body {
+    font-size: 17px; line-height: 1.55;
+    color: var(--dim); margin-bottom: 32px;
+  }
+  .state-body b { color: var(--ink); font-weight: 500; }
+  .state-meta {
+    border-top: 0.5px solid var(--line);
+    padding-top: 22px; display: grid; gap: 8px;
+  }
+  .meta-row {
+    display: grid; grid-template-columns: 110px 1fr;
+    font-family: "JetBrains Mono", monospace; font-size: 12px;
+    align-items: baseline;
+  }
+  .meta-row .k { color: var(--dim); letter-spacing: 2px; text-transform: uppercase; }
+  .meta-row .v { color: var(--ink); transition: color 0.4s ease; font-weight: 500; }
+  .phones-i[data-state="active"] .meta-row .v { color: var(--green); }
+  .phones-i.tejar-showcase[data-state="active"] .meta-row .v { color: #5DCAA5; }
+
+  .state-hint {
+    margin-top: 22px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--very-dim);
+    transition: opacity 0.3s ease;
+  }
+  .phones-i[data-state="active"] .state-hint { opacity: 0; }
+
+  /* phone shell */
+  .phone {
+    width: 380px; height: 800px;
+    background: #000;
+    border-radius: 44px;
+    padding: 8px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.04);
+    position: relative;
+    transform: perspective(1200px) rotateY(-5deg);
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; flex-direction: column;
+  }
+  .phones-i:hover .phone { transform: perspective(1200px) rotateY(0deg); }
+  .phone-screen {
+    flex: 1; border-radius: 36px;
+    background: #0d1620;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    position: relative;
+    color: #E8EEF8;
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+  }
+  .phone-screen.tj-screen { background: #17212B; }
+  .phone-screen::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(91,163,255,0.06), transparent 50%),
+      radial-gradient(circle at 70% 80%, rgba(91,163,255,0.04), transparent 50%);
+    pointer-events: none;
+  }
+  .phone-screen.tj-screen::before { display: none; }
+  .phone-screen::after {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(91,163,255,0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+  .phone-screen.tj-screen::after { display: none; }
+
+  .ph-sb {
+    height: 30px;
+    padding: 0 22px 0 26px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px; font-weight: 500;
+    color: #E8EEF8;
+    position: relative; z-index: 1;
+  }
+  .ph-sb-r { display: flex; align-items: center; gap: 8px; }
+  .ph-vpn {
+    font-size: 9px; padding: 1px 5px;
+    border-radius: 3px; color: #5DCAA5;
+    border: 1px solid #5DCAA5;
+    letter-spacing: 0.8px; font-weight: 700;
+    opacity: 0; transition: opacity 0.4s;
+  }
+  .phones-i[data-state="active"] .ph-vpn { opacity: 1; }
+  .ph-sb svg { display: block; }
+  .ph-home {
+    height: 20px;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 5px;
+    position: relative; z-index: 1;
+  }
+  .ph-home > span {
+    width: 110px; height: 3px;
+    border-radius: 2px;
+    background: #E8EEF8; opacity: 0.5;
+  }
+  .ph-body {
+    flex: 1;
+    display: flex; flex-direction: column;
+    position: relative; z-index: 1;
+    min-height: 0;
+  }
+
+  /* ─── AxiOm chrome ─── */
+  .ax-app-bar {
+    height: 56px;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 8px 0 16px;
+    flex-shrink: 0;
+  }
+  .ax-omega {
+    font-family: "Inter", sans-serif; font-weight: 500;
+    font-size: 22px; color: #5BA3FF;
+    line-height: 1;
+    text-shadow: 0 0 12px rgba(91,163,255,0.4);
+    transition: color 0.4s, text-shadow 0.4s;
+  }
+  .phones-i[data-state="active"] .ax-omega {
+    color: #5DCAA5;
+    text-shadow: 0 0 12px rgba(93,202,165,0.45);
+  }
+  .ax-brand {
+    font-size: 18px; font-weight: 400; letter-spacing: -0.3px;
+    color: #E8EEF8;
+    margin-left: 2px;
+  }
+  .ax-brand .o {
+    color: #5BA3FF; font-weight: 500;
+    transition: color 0.4s;
+  }
+  .phones-i[data-state="active"] .ax-brand .o { color: #5DCAA5; }
+  .ax-version {
+    padding: 2px 7px;
+    background: #142235;
+    color: #9aabc8;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px; letter-spacing: 0.8px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+  .ax-icon-btn {
+    width: 36px; height: 36px;
+    border: none; background: transparent;
+    border-radius: 12px; cursor: pointer;
+    color: #9aabc8;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ax-app-bar .spacer { flex: 1; }
+
+  .ax-chip {
+    margin: 0 16px;
+    padding: 10px 14px;
+    border-radius: 99px;
+    background: #142235;
+    border: 1px solid #1c2a44;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+  }
+  .ax-chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #5DCAA5; box-shadow: 0 0 6px #5DCAA5;
+  }
+  .ax-chip .name { flex: 1; font-size: 14px; font-weight: 500; color: #E8EEF8; }
+  .ax-chip .cnt {
+    font-family: "JetBrains Mono", monospace; font-size: 10px;
+    letter-spacing: 1.2px; color: #5f7193;
+  }
+  .ax-chip .car { color: #9aabc8; display: flex; align-items: center; }
+
+  .ax-hero {
+    flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 12px; padding: 8px 0;
+    min-height: 0;
+  }
+  .ax-connect-btn {
+    width: 188px; height: 188px;
+    border: none; background: transparent;
+    padding: 0; cursor: pointer;
+    position: relative;
+    transition: transform 0.15s, filter 0.4s;
+  }
+  .ax-connect-btn:hover { transform: scale(1.03); }
+  .ax-connect-btn:active { transform: scale(0.97); }
+  .ax-connect-btn .idle, .ax-connect-btn .active {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    border-radius: 50%;
+    transition: opacity 0.5s;
+  }
+  .ax-connect-btn .active { opacity: 0; }
+  .phones-i[data-state="active"] .ax-connect-btn .idle   { opacity: 0; }
+  .phones-i[data-state="active"] .ax-connect-btn .active { opacity: 1; }
+  .ax-connect-btn .pulse {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 2px solid #5DCAA5; opacity: 0; pointer-events: none;
+  }
+  .phones-i[data-state="active"] .ax-connect-btn .pulse {
+    animation: ringPulse 2.2s ease-out infinite;
+  }
+  @keyframes ringPulse {
+    0%   { opacity: 0.6; transform: scale(1);    }
+    100% { opacity: 0;   transform: scale(1.35); }
+  }
+
+  .ax-status {
+    font-size: 17px; font-weight: 500;
+    color: #5BA3FF; letter-spacing: -0.2px;
+    transition: color 0.4s, text-shadow 0.4s;
+    text-align: center;
+  }
+  .phones-i[data-state="active"] .ax-status {
+    color: #5DCAA5;
+    text-shadow: 0 0 12px rgba(93,202,165,0.3);
+  }
+  .ax-hint {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px; letter-spacing: 2px;
+    color: #5f7193; text-transform: uppercase;
+    transition: opacity 0.3s, height 0.3s;
+    height: 14px;
+  }
+  .phones-i[data-state="active"] .ax-hint { opacity: 0; }
+
+  .ax-stats {
+    margin: 0 16px;
+    background: #101a28;
+    border: 1px solid #1c2a44;
+    border-radius: 14px;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .ax-stats .cell {
+    padding: 12px 10px;
+    display: flex; flex-direction: column; gap: 3px;
+    border-right: 1px solid #1c2a44;
+  }
+  .ax-stats .cell:last-child { border-right: none; }
+  .ax-stats .k {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px; color: #5f7193;
+    letter-spacing: 1.4px; text-transform: uppercase; font-weight: 600;
+  }
+  .ax-stats .v {
+    font-size: 14px; font-weight: 500;
+    color: #E8EEF8; letter-spacing: -0.2px;
+    transition: color 0.4s;
+  }
+  .ax-stats .v.ping { color: #9aabc8; }
+  .phones-i[data-state="active"] .ax-stats .v.ping { color: #5DCAA5; }
+
+  .ax-server {
+    margin: 12px 16px 0;
+    padding: 12px; border-radius: 14px;
+    background: #142235;
+    border: 1px solid #1c2a44;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .ax-flag {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #27375a;
+    flex-shrink: 0;
+  }
+  .ax-flag > span { flex: 1; display: block; }
+  .ax-server .info { flex: 1; min-width: 0; }
+  .ax-server .info .nm { font-size: 14px; font-weight: 500; color: #E8EEF8; line-height: 1.2; }
+  .ax-server .info .ip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; color: #5f7193; margin-top: 2px;
+  }
+  .ax-server .ping-col {
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 2px;
+  }
+  .ax-server .ping-col .v {
+    display: flex; align-items: center; gap: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px; font-weight: 600;
+    color: #9aabc8;
+    transition: color 0.4s;
+  }
+  .phones-i[data-state="active"] .ax-server .ping-col .v { color: #5DCAA5; }
+  .ax-server .ping-col .k {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px; letter-spacing: 1.2px;
+    color: #5f7193; text-transform: uppercase;
+  }
+  .ax-server .car { color: #9aabc8; display: flex; align-items: center; }
+
+  .ax-nav {
+    height: 72px; padding: 4px 4px 0;
+    border-top: 1px solid #1c2a44;
+    background: #0d1620;
+    display: flex;
+    flex-shrink: 0;
+  }
+  .ax-nav-i {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding-top: 6px; gap: 3px;
+    position: relative;
+  }
+  .ax-nav-i .pill {
+    width: 56px; height: 28px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    transition: background 0.4s;
+  }
+  .ax-nav-i.act .pill { background: rgba(91,163,255,0.13); }
+  .phones-i[data-state="active"] .ax-nav-i.act .pill { background: rgba(93,202,165,0.13); }
+  .ax-nav-i .lbl {
+    font-size: 11px; color: #5f7193;
+    font-weight: 400;
+  }
+  .ax-nav-i.act .lbl { color: #E8EEF8; font-weight: 500; }
+  .ax-nav-i .badge {
+    position: absolute;
+    top: 2px; right: 12px;
+    min-width: 14px; height: 14px; border-radius: 7px;
+    background: #FF6B6B; color: #fff;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px; font-weight: 700;
+    padding: 0 4px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ax-nav-i svg { display: block; }
+
+  /* ─── Tejar chrome ─── */
+  .tj-action-bar {
+    height: 56px;
+    padding: 0 8px 0 4px;
+    display: flex; align-items: center; gap: 8px;
+    background: #17212B;
+    border-bottom: 1px solid #22303C;
+    flex-shrink: 0;
+  }
+  .tj-action-bar .ax-icon-btn { color: #fff; }
+  .tj-action-bar .title-block { flex: 1; min-width: 0; }
+  .tj-action-bar .title { font-size: 17px; font-weight: 500; color: #fff; line-height: 1.2; }
+  .tj-action-bar .subtitle {
+    font-size: 12px; color: #A8B7C7; line-height: 1.2; margin-top: 2px;
+    transition: color 0.4s;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-action-bar .subtitle { color: #5DCAA5; }
+
+  .tj-content {
+    flex: 1; overflow: auto;
+    background: #17212B;
+    padding: 12px 16px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    min-height: 0;
+  }
+  .tj-content::-webkit-scrollbar { display: none; }
+
+  .tj-hero {
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(168,183,199,0.08);
+    border: 1px solid rgba(168,183,199,0.12);
+    display: flex; flex-direction: column; gap: 14px;
+    transition: background 0.4s, border-color 0.4s;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-hero {
+    background: rgba(93,202,165,0.13);
+    border-color: rgba(93,202,165,0.28);
+  }
+  .tj-hero .row1 { display: flex; align-items: center; gap: 10px; }
+  .tj-hero .dot {
+    width: 10px; height: 10px; border-radius: 5px;
+    background: #6E8195;
+    transition: background 0.4s, box-shadow 0.4s;
+    flex-shrink: 0;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-hero .dot {
+    background: #5DCAA5;
+    box-shadow: 0 0 8px #5DCAA5;
+  }
+  .tj-hero .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 1.2px; color: #A8B7C7;
+    transition: color 0.4s;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-hero .label { color: #5DCAA5; }
+  .tj-hero .uptime {
+    margin-left: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px; font-weight: 500; color: #fff;
+    display: none;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-hero .uptime { display: block; }
+  .tj-hero .body-idle {
+    font-size: 13px; color: #A8B7C7; line-height: 1.4;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-hero .body-idle { display: none; }
+  .tj-hero .server-row {
+    display: none;
+    align-items: center; gap: 12px;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-hero .server-row { display: flex; }
+  .tj-hero .server-row .flag-tile {
+    width: 50px; height: 50px; border-radius: 10px;
+    background: #1E2C3A; border: 1px solid #2A3947;
+    display: flex; flex-direction: column; overflow: hidden;
+    flex-shrink: 0;
+  }
+  .tj-hero .server-row .flag-tile > span { flex: 1; display: block; }
+  .tj-hero .server-row .info { flex: 1; min-width: 0; }
+  .tj-hero .server-row .nm { font-size: 17px; font-weight: 500; color: #fff; line-height: 1.2; }
+  .tj-hero .server-row .ip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12px; color: #A8B7C7; margin-top: 2px;
+  }
+  .tj-hero .ping-col {
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 4px;
+  }
+  .tj-hero .ping-ms {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px; font-weight: 600; color: #5DCAA5;
+  }
+
+  .ping-pips { display: inline-flex; align-items: flex-end; gap: 2px; height: 12px; }
+  .ping-pips > span {
+    width: 3px; border-radius: 1px;
+    background: #5DCAA5;
+  }
+  .ping-pips > span:nth-child(1) { height: 5px; }
+  .ping-pips > span:nth-child(2) { height: 8px; }
+  .ping-pips > span:nth-child(3) { height: 11px; }
+  .ping-pips.slow > span { background: #E8B339; }
+  .ping-pips.slow > span:nth-child(3) { background: #4A5C6E; }
+  .ping-pips.bad > span { background: #E55E5E; }
+  .ping-pips.bad > span:nth-child(2),
+  .ping-pips.bad > span:nth-child(3) { background: #4A5C6E; }
+
+  .tj-stats {
+    display: none;
+    grid-template-columns: 1fr 1fr 1fr;
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+    padding: 10px 0;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-stats { display: grid; }
+  .tj-stats .c {
+    padding: 0 12px; text-align: center;
+    border-right: 1px solid #2A3947;
+  }
+  .tj-stats .c:last-child { border-right: none; }
+  .tj-stats .k {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 1.4px; color: #6E8195;
+  }
+  .tj-stats .v {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px; font-weight: 600; color: #fff;
+    margin-top: 2px;
+  }
+  .tj-stats .v.green { color: #5DCAA5; }
+
+  .tj-primary {
+    padding: 12px 16px; border-radius: 12px;
+    border: 1px solid transparent; cursor: pointer;
+    background: #5BA3FF; color: #fff;
+    font-size: 15px; font-weight: 600;
+    font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.4s, border-color 0.4s, color 0.4s;
+  }
+  .phones-i.tejar-showcase[data-state="active"] .tj-primary {
+    background: rgba(229,94,94,0.13);
+    border-color: rgba(229,94,94,0.4);
+    color: #E55E5E;
+  }
+  .tj-primary .btn-icon-on,
+  .tj-primary .btn-text-on { display: none; }
+  .phones-i.tejar-showcase[data-state="active"] .tj-primary .btn-icon-idle,
+  .phones-i.tejar-showcase[data-state="active"] .tj-primary .btn-text-idle { display: none; }
+  .phones-i.tejar-showcase[data-state="active"] .tj-primary .btn-icon-on,
+  .phones-i.tejar-showcase[data-state="active"] .tj-primary .btn-text-on { display: inline-flex; }
+  .tj-primary svg { display: block; }
+
+  .tj-chip {
+    background: #1E2C3A;
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .tj-chip .ic { color: #5DCAA5; display: flex; }
+  .tj-chip .lbl-block { flex: 1; }
+  .tj-chip .lbl-block .nm { font-size: 14px; color: #fff; font-weight: 500; line-height: 1.2; }
+  .tj-chip .lbl-block .sub { font-size: 11px; color: #A8B7C7; margin-top: 2px; }
+  .tj-chip .sw {
+    width: 38px; height: 22px; border-radius: 11px;
+    background: #5DCAA5; padding: 2px;
+    display: flex; align-items: center; justify-content: flex-end;
+    flex-shrink: 0;
+  }
+  .tj-chip .sw > span {
+    width: 18px; height: 18px; border-radius: 9px; background: #fff;
+  }
+
+  .tj-section-label {
+    display: flex; align-items: center;
+    padding: 4px 0;
+    gap: 8px;
+  }
+  .tj-section-label .lbl {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.4px;
+    color: #5BA3FF; text-transform: uppercase;
+  }
+  .tj-section-label .ext {
+    margin-left: auto;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; color: #6E8195; letter-spacing: 0.8px;
+  }
+
+  .tj-saved { display: flex; flex-direction: column; gap: 8px; }
+  .tj-row {
+    background: #1E2C3A;
+    border-radius: 14px;
+    padding: 10px 12px 10px 12px;
+    display: flex; align-items: center; gap: 10px;
+    border: 1px solid transparent;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .tj-row.active {
+    background: rgba(93,202,165,0.13);
+    border-color: rgba(93,202,165,0.3);
+  }
+  .tj-row .flag-tile {
+    width: 32px; height: 32px; border-radius: 7px;
+    background: #243447; border: 1px solid #2A3947;
+    display: flex; overflow: hidden;
+    flex-shrink: 0;
+  }
+  .tj-row .flag-tile > span { flex: 1; display: block; }
+  .tj-row .mid { flex: 1; min-width: 0; }
+  .tj-row .head { display: flex; align-items: center; gap: 6px; }
+  .tj-proto-badge {
+    padding: 2px 6px; border-radius: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px; font-weight: 700; letter-spacing: 0.6px;
+    text-align: center; min-width: 40px;
+    background: rgba(91,163,255,0.12);
+    border: 1px solid rgba(91,163,255,0.25);
+    color: #5BA3FF;
+    flex-shrink: 0;
+  }
+  .tj-row.active .tj-proto-badge {
+    background: rgba(93,202,165,0.13);
+    border-color: rgba(93,202,165,0.3);
+    color: #5DCAA5;
+  }
+  .tj-row .nm {
+    font-size: 13px; font-weight: 500; color: #fff; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .tj-row .ip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px; color: #A8B7C7; margin-top: 3px;
+  }
+  .tj-row .right {
+    display: flex; flex-direction: column;
+    align-items: flex-end; gap: 4px;
+    flex-shrink: 0;
+  }
+  .tj-row .ping {
+    display: flex; align-items: center; gap: 5px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px; font-weight: 600;
+    color: #5DCAA5;
+  }
+  .tj-row .ping.slow { color: #E8B339; }
+  .tj-row .down {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px; font-weight: 700;
+    color: #E55E5E; letter-spacing: 0.6px;
+  }
+  .tj-row .badge-active {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 8.5px; font-weight: 700; letter-spacing: 0.8px;
+    color: #5DCAA5; padding: 2px 6px;
+    background: rgba(93,202,165,0.15); border-radius: 4px;
+  }
+  .tj-row .badge-use {
+    padding: 3px 9px; border-radius: 10px;
+    border: none; background: #5BA3FF; color: #fff;
+    font-size: 10.5px; font-weight: 600; cursor: pointer;
+    font-family: inherit;
+  }
+
+  @media (max-width: 1100px) {
+    .phones-i { grid-template-columns: 1fr; gap: 50px; }
+    .phone { margin: 0 auto; transform: none; }
+    .phones-i:hover .phone { transform: none; }
+  }
+
+  /* ─── scrollytelling reveals ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition:
+      opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.r-left  { transform: translate(-40px, 12px); }
+  .reveal.r-right { transform: translate(40px, 12px); }
+  .reveal.r-scale { transform: scale(0.9); transform-origin: center; }
+  .reveal.r-fade  { transform: none; }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal-stagger.in > * {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-stagger.in > *:nth-child(1)  { transition-delay: 0.04s; }
+  .reveal-stagger.in > *:nth-child(2)  { transition-delay: 0.12s; }
+  .reveal-stagger.in > *:nth-child(3)  { transition-delay: 0.20s; }
+  .reveal-stagger.in > *:nth-child(4)  { transition-delay: 0.28s; }
+  .reveal-stagger.in > *:nth-child(5)  { transition-delay: 0.36s; }
+  .reveal-stagger.in > *:nth-child(6)  { transition-delay: 0.44s; }
+  .reveal-stagger.in > *:nth-child(7)  { transition-delay: 0.52s; }
+  .reveal-stagger.in > *:nth-child(8)  { transition-delay: 0.60s; }
+
+  /* Two-column "left-right" stagger (for hero, RU server, phone showcase) */
+  .reveal-lr > *:nth-child(1) { transform: translateX(-40px); }
+  .reveal-lr > *:nth-child(2) { transform: translateX(40px); }
+  .reveal-lr > * {
+    opacity: 0;
+    transition:
+      opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal-lr.in > * {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal-lr.in > *:nth-child(2) { transition-delay: 0.12s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-stagger > *, .reveal-lr > * {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* responsive */
+  @media (max-width: 1100px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .hero-mark { max-width: 320px; margin: 40px auto 0; }
+    .hero-headline { font-size: 72px; letter-spacing: -2px; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stat { border-bottom: 0.5px solid var(--line); padding: 24px 32px; }
+    .stat:nth-child(2) { border-right: none; }
+    .stat:nth-last-child(-n+2) { border-bottom: none; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .ru { grid-template-columns: 1fr; }
+    .ru-right { border-left: none; border-top: 0.5px solid var(--line); }
+    .countries { grid-template-columns: 1fr 1fr; }
+    .apps { grid-template-columns: 1fr; }
+    .phones { grid-template-columns: 1fr; }
+    .phone-cell { border-right: none; border-bottom: 0.5px solid var(--line); }
+    .phone-cell:last-child { border-bottom: none; }
+    .prices { grid-template-columns: 1fr; }
+    .tg-grid { grid-template-columns: 1fr; }
+    .routing-flow { grid-template-columns: 1fr; }
+    .section-title { font-size: 36px; letter-spacing: -1px; }
+    .closing-headline { font-size: 44px; letter-spacing: -1.5px; }
+  }
+  @media (max-width: 700px) {
+    .wrap, .nav-inner { padding-left: 24px; padding-right: 24px; }
+    .nav-links a:not(.btn) { display: none; }
+    .hero-headline { font-size: 56px; }
+    .hero { padding: 60px 0 50px; }
+    .section { padding: 70px 0; }
+  }
+
+  /* ─────────── BUY MODAL ─────────── */
+  .buy-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity .25s, visibility .25s;
+    padding: 20px;
+  }
+  .buy-overlay.open { opacity: 1; visibility: visible; }
+  .buy-modal {
+    background: var(--bg-card);
+    border: 0.5px solid var(--line-2);
+    border-radius: 16px;
+    width: 100%; max-width: 480px;
+    padding: 32px;
+    transform: translateY(24px) scale(.97);
+    transition: transform .25s;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .buy-overlay.open .buy-modal { transform: translateY(0) scale(1); }
+  .buy-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .buy-seg-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .buy-seg { display: flex; gap: 0; margin-top: 0; }
+  .buy-seg button {
+    padding: 8px 16px; font-size: 13px; font-family: inherit;
+    border: 0.5px solid var(--line-2); background: transparent;
+    color: var(--dim); cursor: pointer; transition: all .18s;
+  }
+  .buy-seg button:first-child { border-radius: 8px 0 0 8px; }
+  .buy-seg button:last-child  { border-radius: 0 8px 8px 0; }
+  .buy-seg button.act { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .buy-seg button:hover:not(.act) { color: var(--ink); border-color: var(--blue-soft); }
+  .save-tag {
+    font-size: 10px; background: rgba(0,200,83,.15); color: var(--green);
+    border-radius: 4px; padding: 1px 5px; margin-left: 4px;
+  }
+  .buy-card {
+    margin-top: 20px;
+    border: 0.5px solid var(--line-2);
+    border-radius: 12px;
+    padding: 20px;
+    background: var(--bg-soft);
+  }
+  .buy-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .buy-plan-tier { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue-soft); }
+  .buy-plan-name { font-size: 17px; font-weight: 400; margin-top: 4px; }
+  .buy-price-block { text-align: right; }
+  .buy-price-num { font-size: 32px; font-weight: 200; line-height: 1; }
+  .buy-price-num .cur { font-size: 18px; color: var(--ink); font-weight: 300; }
+  .buy-price-per { font-size: 12px; color: var(--dim); margin-top: 2px; }
+  .buy-card-feats { display: flex; flex-direction: column; gap: 6px; }
+  .buy-card-feats div { font-size: 13px; color: var(--dim); padding-left: 14px; position: relative; }
+  .buy-card-feats div::before { content: "·"; position: absolute; left: 0; color: var(--blue-soft); }
+  .buy-pay-btns { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .buy-pay-btn { flex: 1; min-width: 140px; justify-content: center; display: flex; align-items: center; gap: 8px; }
+  .buy-note { font-size: 11px; color: var(--very-dim); text-align: center; margin-top: 10px; }
+  .buy-spinner {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid var(--line-2); border-top-color: var(--blue);
+    animation: spin .8s linear infinite; margin: 40px auto 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .buy-success-icon { font-size: 48px; color: var(--green); margin: 32px 0 16px; }
+  .buy-success-title { font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+  .buy-success-sub { font-size: 14px; color: var(--dim); margin-bottom: 16px; }
+  .buy-sub-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg); border: 0.5px solid var(--line-2);
+    border-radius: 8px; padding: 12px 14px;
+    overflow-x: auto;
+  }
+  .buy-sub-box code { font-family: "JetBrains Mono", monospace; font-size: 12px; color: var(--blue-soft); flex: 1; word-break: break-all; }
+  .buy-copy-btn {
+    flex-shrink: 0; background: none; border: none; cursor: pointer;
+    color: var(--dim); padding: 4px; border-radius: 4px; transition: color .15s;
+  }
+  .buy-copy-btn:hover { color: var(--blue-soft); }
+  @media (max-width: 500px) {
+    .buy-modal { padding: 20px; }
+    .buy-seg-row { flex-direction: column; }
+    .buy-pay-btns { flex-direction: column; }
+  }
+
+</style>
+<style id="enhance-css">
+  /* ─── Pricing comparison modal ───────────────────────── */
+  .compare-link { transition: color 0.15s; }
+  .compare-link:hover { color: var(--ink); }
+
+  .cmp-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 20px;
+    background: rgba(6, 13, 23, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .cmp-overlay.open { opacity: 1; visibility: visible; }
+  .cmp-modal {
+    width: 100%; max-width: 860px;
+    max-height: 88vh;
+    background: var(--bg-card);
+    border: 0.5px solid var(--line-2);
+    border-radius: 16px;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    transform: translateY(16px) scale(0.98);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .cmp-overlay.open .cmp-modal { transform: translateY(0) scale(1); }
+
+  .cmp-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    padding: 28px 32px 22px;
+    border-bottom: 0.5px solid var(--line);
+    flex-shrink: 0;
+  }
+  .cmp-head .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--blue-soft); margin-bottom: 10px;
+  }
+  .cmp-head .ttl {
+    font-size: 28px; font-weight: 200; letter-spacing: -0.8px;
+    color: var(--ink); line-height: 1;
+  }
+  .cmp-head .ttl em { font-style: normal; color: var(--blue-soft); font-weight: 300; }
+  .cmp-close {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border: 0.5px solid var(--line-2); border-radius: 8px;
+    background: var(--bg-soft); color: var(--dim);
+    cursor: pointer; font-size: 20px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .cmp-close:hover { color: var(--ink); border-color: var(--blue-soft); }
+
+  .cmp-billing {
+    display: flex; gap: 6px; align-items: center;
+    padding: 16px 32px 0;
+  }
+  .cmp-billing .seg {
+    display: inline-flex; padding: 3px;
+    background: var(--bg-soft);
+    border: 0.5px solid var(--line);
+    border-radius: 8px;
+  }
+  .cmp-billing .seg button {
+    border: none; background: none; cursor: pointer;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--dim);
+    padding: 7px 16px; border-radius: 6px;
+    transition: all 0.18s;
+  }
+  .cmp-billing .seg button.act { background: var(--blue); color: #fff; }
+  .cmp-billing .save {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px; letter-spacing: 0.5px;
+    color: var(--green);
+  }
+
+  .cmp-scroll { overflow-y: auto; padding: 8px 32px 32px; }
+  .cmp-scroll::-webkit-scrollbar { width: 8px; }
+  .cmp-scroll::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 4px; }
+
+  table.cmp-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin-top: 16px;
+  }
+  table.cmp-table th, table.cmp-table td {
+    text-align: left; padding: 14px 12px;
+    border-bottom: 0.5px solid var(--line);
+    vertical-align: middle;
+  }
+  table.cmp-table thead th {
+    position: relative; z-index: 2;
+    background: var(--bg-card);
+    border-bottom: 0.5px solid var(--line-2);
+    padding-top: 18px; padding-bottom: 18px;
+  }
+  table.cmp-table thead th:first-child { width: 42%; }
+  table.cmp-table th.plan-col { text-align: center; }
+  table.cmp-table thead th { z-index: 3; }
+  table.cmp-table th.plan-col.feat::after {
+    content: ""; position: absolute;
+    top: 0; left: 8px; right: 8px; height: 2px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-soft));
+    border-radius: 2px;
+  }
+  .cmp-plan-tier {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dim);
+  }
+  th.plan-col.feat .cmp-plan-tier { color: var(--blue-soft); }
+  .cmp-plan-name {
+    font-size: 17px; font-weight: 400; color: var(--ink);
+    letter-spacing: -0.3px; margin: 6px 0 8px;
+  }
+  .cmp-plan-price { font-size: 30px; font-weight: 200; color: var(--ink); letter-spacing: -1px; line-height: 1; }
+  .cmp-plan-price .cur { font-size: 15px; color: var(--dim); font-weight: 300; margin-left: 1px; }
+  .cmp-plan-price .per { display: block; font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--dim); letter-spacing: 1px; margin-top: 6px; }
+
+  table.cmp-table tbody .grp td {
+    padding-top: 26px; padding-bottom: 8px;
+    border-bottom: 0.5px solid var(--line-2);
+  }
+  table.cmp-table tbody .grp .grp-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--blue-soft);
+  }
+  table.cmp-table td.feature-name {
+    font-size: 14px; color: var(--ink); font-weight: 300;
+  }
+  table.cmp-table td.feature-name span { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+  table.cmp-table td.cell {
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px; color: var(--ink);
+  }
+  table.cmp-table td.cell.feat-bg { background: rgba(30,144,255,0.05); }
+  table.cmp-table thead th.plan-col.feat { background: #162c49; }
+  table.cmp-table tbody .grp td.feat-bg { background: rgba(30,144,255,0.05); }
+  .cmp-yes { color: var(--green); font-size: 16px; }
+  .cmp-no  { color: var(--very-dim); font-size: 15px; }
+  td.cell .muted { color: var(--dim); }
+
+  .cmp-foot {
+    display: grid; grid-template-columns: 42% 1fr 1fr;
+    gap: 0; margin-top: 8px;
+    border-top: 0.5px solid var(--line-2);
+  }
+  .cmp-foot .fcell { padding: 22px 12px 4px; text-align: center; }
+  .cmp-foot .fcell:first-child { text-align: left; padding-left: 12px; }
+  .cmp-foot .btn { width: 100%; justify-content: center; }
+
+  @media (max-width: 720px) {
+    .cmp-head .ttl { font-size: 22px; }
+    .cmp-scroll { padding: 8px 16px 24px; }
+    .cmp-head { padding: 22px 18px 18px; }
+    .cmp-billing { padding: 14px 18px 0; flex-wrap: wrap; }
+    table.cmp-table th, table.cmp-table td { padding: 11px 7px; }
+    .cmp-plan-price { font-size: 24px; }
+    .cmp-plan-name { font-size: 14px; }
+  }
+
+  /* ─── Aurora behind hero ─────────────────────────────── */
+  .hero { position: relative; isolation: isolate; }
+  .hero::before {
+    content: "";
+    position: absolute; inset: -20% -10%;
+    background:
+      radial-gradient(40% 30% at 22% 28%, rgba(61,164,255,0.18), transparent 60%),
+      radial-gradient(35% 25% at 78% 70%, rgba(30,144,255,0.14), transparent 60%),
+      radial-gradient(25% 18% at 55% 50%, rgba(0,200,83,0.06), transparent 65%);
+    filter: blur(30px);
+    animation: auroraDrift 22s ease-in-out infinite alternate;
+    pointer-events: none;
+    z-index: -1;
+  }
+  @keyframes auroraDrift {
+    0%   { transform: translate(0, 0)         scale(1); }
+    33%  { transform: translate(-40px, 26px)  scale(1.06); }
+    66%  { transform: translate(36px, -20px)  scale(0.97); }
+    100% { transform: translate(0, 0)         scale(1); }
+  }
+
+  /* ─── 3D hero mount ──────────────────────────────────── */
+  .hero-3d {
+    position: absolute; inset: 0;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.7s ease;
+    cursor: grab;
+  }
+  body.has-3d .hero-3d { opacity: 1; }
+  body.has-3d .hero-mark > svg {
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+  .hero-mark::before { z-index: 0; }
+
+  /* ─── Routing flow particles ─────────────────────────── */
+  .route-arrow { overflow: visible; }
+  .route-line .dot {
+    position: absolute;
+    top: -3.5px;
+    left: 0;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--blue-soft);
+    box-shadow:
+      0 0 6px var(--blue-soft),
+      0 0 14px rgba(61,164,255,0.55);
+    animation: routeDot 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    pointer-events: none;
+  }
+  .route-line.direct .dot {
+    background: var(--green);
+    box-shadow:
+      0 0 6px var(--green),
+      0 0 14px rgba(0,200,83,0.55);
+    animation-duration: 1.9s;
+  }
+  @keyframes routeDot {
+    0%   { left: 0;    opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { left: calc(100% - 7px); opacity: 0; }
+  }
+
+  /* ─── Closing: floating 3D Ω ─────────────────────────── */
+  .closing { position: relative; overflow: hidden; }
+  .closing-omega {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "Inter", sans-serif;
+    font-weight: 200;
+    font-size: 540px;
+    color: rgba(61,164,255,0.05);
+    line-height: 1;
+    pointer-events: none;
+    z-index: 0;
+    transform-origin: center;
+    animation: omegaFloat 16s ease-in-out infinite;
+    user-select: none;
+    text-shadow: 0 0 60px rgba(61,164,255,0.08);
+  }
+  @keyframes omegaFloat {
+    0%, 100% { transform: translate(-50%, -50%) rotateY(-22deg) rotateX(8deg)  scale(1); }
+    50%      { transform: translate(-50%, -50%) rotateY( 22deg) rotateX(-8deg) scale(1.04); }
+  }
+  .closing > .wrap { position: relative; z-index: 1; }
+
+  /* ─── Section-num pulse indicator ────────────────────── */
+  .section-num { position: relative; padding-left: 16px; }
+  .section-num::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 50%;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--blue-soft);
+    transform: translateY(-50%);
+    box-shadow: 0 0 6px var(--blue-soft);
+    animation: numPulse 2.6s ease-in-out infinite;
+  }
+  @keyframes numPulse {
+    0%, 100% { opacity: 0.5; transform: translateY(-50%) scale(1); }
+    50%      { opacity: 1;   transform: translateY(-50%) scale(1.5); }
+  }
+
+  /* ─── Feature card depth gradient on hover ───────────── */
+  .feat.tilt { position: relative; overflow: hidden; }
+  .feat.tilt::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(61,164,255,0.06), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .feat.tilt:hover::before { opacity: 1; }
+  .feat.tilt > * { position: relative; z-index: 1; }
+
+  /* ─── Country flag rings: subtle 3D entrance + idle ─── */
+  .country .flag { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+  .country.tilt:hover .flag {
+    transform: rotateY(360deg) scale(1.08);
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* ─── Subtle scroll-tracked gradient bar between sections ─ */
+  .section { position: relative; }
+  .section + .section::before {
+    content: "";
+    position: absolute;
+    top: -0.5px; left: 50%;
+    width: 80px; height: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, transparent, var(--blue-soft), transparent);
+    opacity: 0.45;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero::before,
+    .closing-omega,
+    .route-line .dot,
+    .section-num::before { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─────────── NAV ─────────── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      <span class="mark">
+        <svg viewBox="0 0 100 100" width="28" height="28">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="#3da4ff" stroke-width="2"/>
+          <ellipse cx="50" cy="50" rx="19" ry="46" fill="none" stroke="#3da4ff" stroke-width="0.9" opacity="0.55"/>
+          <line x1="4" y1="50" x2="96" y2="50" stroke="#3da4ff" stroke-width="0.9" opacity="0.4"/>
+          <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+                font-family="Inter, sans-serif" font-weight="500" font-size="58" fill="#3da4ff">Ω</text>
+        </svg>
+      </span>
+      <span>Axi<span class="o">Ω</span>m</span>
+    </a>
+    <div class="nav-links">
+      <a href="#under-hood">Возможности</a>
+      <a href="#products">Приложения</a>
+      <a href="#pricing">Тарифы</a>
+      <a href="https://t.me/COMMUNITY" target="_blank" rel="noopener">Telegram</a>
+      <span id="navAccount" class="nav-account">
+        <a class="btn" id="navLoginBtn" href="/login">Войти</a>
+      </span>
+      <a class="btn primary" href="#pricing" onclick="openBuyModal(0); return false;">
+        Купить <span class="arr">→</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<script>
+  // Подгрузка статуса аккаунта в навигацию: гость → «Войти», вошёл → «Кабинет».
+  (function navAccount() {
+    fetch('/api/web/me', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d || !d.authenticated) return;
+        const box = document.getElementById('navAccount');
+        if (box) box.innerHTML = '<a class="btn" href="/cabinet">Кабинет</a>';
+      })
+      .catch(() => {});
+  })();
+</script>
+
+<!-- ─────────── HERO ─────────── -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <div class="eyebrow mono accent">AxiOm VPN · v1.0 · 2026</div>
+        <h1 class="hero-headline">Свобода —<br/><em>аксиома.</em></h1>
+        <div class="hero-lede">
+          Не приложение. Не подписка. <b>Инструмент.</b>
+          VLESS Reality, сплит-туннелирование, маршрут через четыре страны —
+          ты управляешь, а не сервис за тебя.
+        </div>
+        <div class="hero-actions">
+          <a class="btn" href="https://t.me/COMMUNITY" target="_blank" rel="noopener">
+            Telegram-канал <span class="arr">↗</span>
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span><b>260+ Мбит/с</b> · реальная скорость</span>
+          <span><b>4 страны</b> · NL · FR · PL · RU</span>
+          <span><b>Поддержка</b> · 9:00 – 23:00</span>
+        </div>
+      </div>
+
+      <div class="hero-mark">
+        <div class="hero-3d" id="hero3d"></div>
+        <svg viewBox="0 0 200 200">
+          <defs>
+            <radialGradient id="haloGrad" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stop-color="#3da4ff" stop-opacity="0.35"/>
+              <stop offset="1" stop-color="#3da4ff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="100" cy="100" r="98" fill="url(#haloGrad)" opacity="0.4"/>
+          <circle cx="100" cy="100" r="92" fill="none" stroke="#3da4ff" stroke-width="1.4"/>
+          <ellipse cx="100" cy="100" rx="38" ry="92" fill="none" stroke="#3da4ff" stroke-width="0.7" opacity="0.55"/>
+          <ellipse cx="100" cy="100" rx="92" ry="22" fill="none" stroke="#3da4ff" stroke-width="0.5" opacity="0.4"/>
+          <line x1="8" y1="100" x2="192" y2="100" stroke="#3da4ff" stroke-width="0.5" opacity="0.35"/>
+          <text x="100" y="100" text-anchor="middle" dominant-baseline="central"
+                font-family="Inter, sans-serif" font-weight="500" font-size="118" fill="#3da4ff">Ω</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── STATS ─────────── -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-num">260<span class="u">+ Мбит/с</span></div>
+        <div class="stat-label">скорость · фактическая</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4<span class="u">страны</span></div>
+        <div class="stat-label">собственная инфраструктура</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3<span class="u">протокола</span></div>
+        <div class="stat-label">tcp · reality · ws · warp</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">14<span class="u">часов / день</span></div>
+        <div class="stat-label">поддержка · 9:00 – 23:00</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── ПОД КАПОТОМ ─────────── -->
+<section class="section" id="under-hood">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Что под <em>капотом.</em></h2>
+        <div class="section-sub">
+          Три протокола, четыре страны, обход DPI на уровне инфраструктуры — не на уровне «отговорок».
+        </div>
+      </div>
+      <span class="section-num">01 / Технология</span>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat tilt">
+        <span class="feat-num">01 / Протокол</span>
+        <div class="feat-title">VLESS Reality</div>
+        <div class="feat-body">
+          Соединение неотличимо от обычного HTTPS — DPI его не видит. Блокировки не работают, потому что блокировать нечего: трафик выглядит как запрос к Google или CDN.
+        </div>
+        <div class="feat-mono">tcp · tls 1.3 · reality</div>
+      </div>
+
+      <div class="feat tilt">
+        <span class="feat-num">02 / Протокол</span>
+        <div class="feat-title">VLESS WebSocket</div>
+        <div class="feat-body">
+          Трафик прячется за инфраструктурой Cloudflare и маскируется под CDN-запросы. Работает там, где заблокированы все остальные VPN-протоколы.
+        </div>
+        <div class="feat-mono">ws · tls · cloudflare cdn</div>
+      </div>
+
+      <div class="feat tilt">
+        <span class="feat-num">03 / Слой</span>
+        <div class="feat-title">Режим WARP</div>
+        <div class="feat-body">
+          Дополнительный слой шифрования поверх основного туннеля. Скрывает сам факт использования VPN — даже от провайдера.
+        </div>
+        <div class="feat-mono">double layer · stealth</div>
+      </div>
+
+      <div class="feat tilt">
+        <span class="feat-num">04 / Сеть</span>
+        <div class="feat-title">Обход DPI</div>
+        <div class="feat-body">
+          Не приложение, а инфраструктура. Маршруты, узлы, sealing-серверы и резервные пути выстроены так, чтобы DPI ничего не находил.
+        </div>
+        <div class="feat-mono">routing · failover · sealing</div>
+      </div>
+
+      <div class="feat tilt">
+        <span class="feat-num">05 / Контроль</span>
+        <div class="feat-title">Сплит-туннелирование</div>
+        <div class="feat-body">
+          Сам выбираешь, какие приложения идут через VPN, а какие напрямую. По домену, по IP, по процессу. Netflix и Госуслуги — одновременно.
+        </div>
+        <div class="feat-mono">.ru → direct · all → tunnel</div>
+      </div>
+
+      <div class="feat tilt">
+        <span class="feat-num">06 / Скорость</span>
+        <div class="feat-title">260+ Мбит/с</div>
+        <div class="feat-body">
+          Прямые аплинки до магистральных узлов, без перепродажи каналов и без переподписки. Низкая латентность даже на дальних маршрутах.
+        </div>
+        <div class="feat-mono">direct uplink · low latency</div>
+      </div>
+    </div>
+
+    <!-- countries -->
+    <div class="countries">
+      <div class="country tilt">
+        <div class="flag" style="flex-direction: column;">
+          <span style="background:#AE1C28;"></span>
+          <span style="background:#ffffff;"></span>
+          <span style="background:#21468B;"></span>
+        </div>
+        <div>
+          <div class="name">Нидерланды</div>
+          <div class="meta">amsterdam · 31 ms</div>
+        </div>
+      </div>
+      <div class="country tilt">
+        <div class="flag" style="flex-direction: row;">
+          <span style="background:#0055A4;"></span>
+          <span style="background:#ffffff;"></span>
+          <span style="background:#EF4135;"></span>
+        </div>
+        <div>
+          <div class="name">Франция</div>
+          <div class="meta">paris · 74 ms</div>
+        </div>
+      </div>
+      <div class="country tilt">
+        <div class="flag" style="flex-direction: column;">
+          <span style="background:#ffffff;"></span>
+          <span style="background:#DC143C;"></span>
+        </div>
+        <div>
+          <div class="name">Польша</div>
+          <div class="meta">warsaw · 38 ms</div>
+        </div>
+      </div>
+      <div class="country tilt">
+        <div class="flag" style="flex-direction: column;">
+          <span style="background:#ffffff;"></span>
+          <span style="background:#0039A6;"></span>
+          <span style="background:#D52B1E;"></span>
+        </div>
+        <div>
+          <div class="name">Россия</div>
+          <div class="meta">moscow · 14 ms</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── PHONE SHOWCASE — AxiOm ─────────── -->
+<section class="section" id="axiom-app">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Одна кнопка. <em>Два мира.</em></h2>
+        <div class="section-sub">
+          Нажми Ω — и весь интернет переключится в туннель. Никаких настроек, никаких профилей — за тебя всё подобрано.
+        </div>
+      </div>
+      <span class="section-num">02 / AxiOm</span>
+    </div>
+
+    <div class="phones-i axiom-showcase" data-state="idle" id="phonesAx">
+      <div class="phone-i-text">
+        <div class="state-eyebrow" id="axEyebrow">состояние · offline</div>
+        <div class="state-title" id="axTitle">До <em>нажатия.</em></div>
+        <div class="state-body" id="axBody">
+          Один экран. Одна кнопка. Профиль свёрнут в chip, всё остальное — под контролем. Нажми Ω — внешний трафик уходит в туннель, домены .ru остаются прямыми.
+        </div>
+        <div class="state-meta">
+          <div class="meta-row"><span class="k">сервер</span><span class="v" id="axMetaNode">—</span></div>
+          <div class="meta-row"><span class="k">ip</span><span class="v" id="axMetaIp">—</span></div>
+          <div class="meta-row"><span class="k">пинг</span><span class="v" id="axMetaMs">— ms</span></div>
+          <div class="meta-row"><span class="k">протокол</span><span class="v" id="axMetaProto">—</span></div>
+        </div>
+        <div class="state-hint">→ нажми Ω в моке справа</div>
+      </div>
+
+      <div class="phone" id="phoneAx">
+        <div class="phone-screen">
+          <div class="ph-sb">
+        <div>10:39</div>
+        <div class="ph-sb-r">
+          <span class="ph-vpn">VPN</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a14 14 0 0 1 18 0"/><path d="M6 12.5a10 10 0 0 1 12 0"/><path d="M9 16a6 6 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8" fill="currentColor"/></svg>
+          <span>100%</span>
+        </div>
+      </div>
+          <div class="ph-body">
+            <!-- AppBar -->
+            <div class="ax-app-bar">
+              <span class="ax-omega">Ω</span>
+              <span class="ax-brand">Axi<span class="o">Ω</span>m</span>
+              <span class="ax-version">v0.7.1</span>
+              <span class="spacer"></span>
+              <button class="ax-icon-btn" type="button" aria-label="tune"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="14" y2="7"/><circle cx="17" cy="7" r="2.4"/><line x1="4" y1="17" x2="9" y2="17"/><circle cx="12" cy="17" r="2.4"/><line x1="15" y1="17" x2="20" y2="17"/></svg></button>
+              <button class="ax-icon-btn" type="button" aria-label="add"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+            </div>
+
+            <!-- Profile chip -->
+            <div class="ax-chip">
+              <span class="dot"></span>
+              <span class="name">Default Profile</span>
+              <span class="cnt">3 ПРОФИЛЯ</span>
+              <span class="car"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+            </div>
+
+            <!-- Hero connect zone -->
+            <div class="ax-hero">
+              <button class="ax-connect-btn" id="axBtn" type="button" aria-pressed="false" aria-label="Подключить">
+                <svg class="idle" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="bgIdleN" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1f3a64"/>
+      <stop offset="60%" stop-color="#142745"/>
+      <stop offset="100%" stop-color="#0A0F18"/>
+    </radialGradient>
+    <radialGradient id="glowIdleN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5BA3FF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#5BA3FF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bgIdleN)"/>
+  <circle cx="100" cy="100" r="98" fill="url(#glowIdleN)"/>
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#5BA3FF" stroke-width="1.3" opacity="0.85"/>
+  <ellipse cx="100" cy="100" rx="38" ry="92" fill="none" stroke="#5BA3FF" stroke-width="0.8" opacity="0.55"/>
+  <ellipse cx="100" cy="100" rx="92" ry="22" fill="none" stroke="#5BA3FF" stroke-width="0.6" opacity="0.4"/>
+  <line x1="8" y1="100" x2="192" y2="100" stroke="#5BA3FF" stroke-width="0.6" opacity="0.5"/>
+  <text x="100" y="100" text-anchor="middle" dominant-baseline="central" font-family="Inter, sans-serif" font-weight="500" font-size="120" fill="#5BA3FF">Ω</text>
+</svg>
+                <svg class="active" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <radialGradient id="bgActN" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1d4a3a"/>
+      <stop offset="60%" stop-color="#0f2a20"/>
+      <stop offset="100%" stop-color="#060A18"/>
+    </radialGradient>
+    <radialGradient id="glowActN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5DCAA5" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#5DCAA5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#bgActN)"/>
+  <circle cx="100" cy="100" r="98" fill="url(#glowActN)"/>
+  <circle cx="100" cy="100" r="92" fill="none" stroke="#5DCAA5" stroke-width="1.3" opacity="0.9"/>
+  <ellipse cx="100" cy="100" rx="38" ry="92" fill="none" stroke="#5DCAA5" stroke-width="0.8" opacity="0.6"/>
+  <ellipse cx="100" cy="100" rx="92" ry="22" fill="none" stroke="#5DCAA5" stroke-width="0.6" opacity="0.45"/>
+  <line x1="8" y1="100" x2="192" y2="100" stroke="#5DCAA5" stroke-width="0.6" opacity="0.55"/>
+  <text x="100" y="100" text-anchor="middle" dominant-baseline="central" font-family="Inter, sans-serif" font-weight="500" font-size="120" fill="#5DCAA5">Ω</text>
+</svg>
+                <span class="pulse"></span>
+              </button>
+              <div class="ax-status" id="axStatus">Готов к подключению</div>
+              <div class="ax-hint">НАЖМИТЕ ДЛЯ ПОДКЛЮЧЕНИЯ</div>
+            </div>
+
+            <!-- Stats row -->
+            <div class="ax-stats">
+              <div class="cell">
+                <span class="k">ТРАФИК</span>
+                <span class="v">12.4 / 50 ГБ</span>
+              </div>
+              <div class="cell">
+                <span class="k">ДНИ</span>
+                <span class="v">28</span>
+              </div>
+              <div class="cell">
+                <span class="k">ПИНГ</span>
+                <span class="v ping" id="axPing">—</span>
+              </div>
+            </div>
+
+            <!-- Server footer -->
+            <div class="ax-server">
+              <div class="ax-flag" id="axFlag" style="flex-direction: column;">
+                <span style="background:#2a3552;"></span>
+                <span style="background:#3a466e;"></span>
+                <span style="background:#2a3552;"></span>
+              </div>
+              <div class="info">
+                <div class="nm" id="axServerName">Сервер не выбран</div>
+                <div class="ip" id="axServerIp">—</div>
+              </div>
+              <div class="ping-col">
+                <div class="v" id="axServerPing">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a14 14 0 0 1 18 0"/><path d="M6 12.5a10 10 0 0 1 12 0"/><path d="M9 16a6 6 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>
+                  <span>—</span>
+                </div>
+                <span class="k">СЕРВЕР</span>
+              </div>
+              <span class="car"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg></span>
+            </div>
+
+            <!-- Bottom nav (4 tabs) -->
+            <div class="ax-nav">
+              <div class="ax-nav-i act">
+                <div class="pill" style="color:#E8EEF8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5.5a8 8 0 1 0 8 0"/><line x1="12" y1="3" x2="12" y2="12"/></svg></div>
+                <span class="lbl">Главная</span>
+              </div>
+              <div class="ax-nav-i">
+                <div class="pill" style="color:#9aabc8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="8" height="6" rx="1.5"/><rect x="3" y="13" width="8" height="6" rx="1.5"/><line x1="14" y1="7" x2="21" y2="7"/><line x1="14" y1="11" x2="19" y2="11"/><line x1="14" y1="15" x2="21" y2="15"/><line x1="14" y1="19" x2="19" y2="19"/></svg></div>
+                <span class="lbl">Профили</span>
+              </div>
+              <div class="ax-nav-i">
+                <div class="pill" style="color:#9aabc8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="7 10 10 12 7 14"/><line x1="12" y1="15" x2="16" y2="15"/></svg><span class="badge">3</span></div>
+                <span class="lbl">Логи</span>
+              </div>
+              <div class="ax-nav-i">
+                <div class="pill" style="color:#9aabc8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg></div>
+                <span class="lbl">Настройки</span>
+              </div>
+            </div>
+          </div>
+          <div class="ph-home"><span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── PHONE SHOWCASE — Tejar ─────────── -->
+<section class="section" id="tejar-app">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Telegram. <em>Без блокировок.</em></h2>
+        <div class="section-sub">
+          Tejar — форк Telegram со встроенным прокси AxiOm. Тот же интерфейс, те же чаты, те же боты. Включи Reality-туннель прямо в настройках мессенджера.
+        </div>
+      </div>
+      <span class="section-num">03 / Tejar</span>
+    </div>
+
+    <div class="phones-i tejar-showcase" data-state="idle" id="phonesTj">
+      <div class="phone-i-text">
+        <div class="state-eyebrow" id="tjEyebrow">состояние · not connected</div>
+        <div class="state-title" id="tjTitle">Прокси <em>внутри Telegram.</em></div>
+        <div class="state-body" id="tjBody">
+          Не отдельное приложение. Не сторонний бот. Настройки прокси встроены в сам мессенджер — открыл, вставил VLESS-ссылку, подключился. <b>Telegram работает даже там, где он заблокирован.</b>
+        </div>
+        <div class="state-meta">
+          <div class="meta-row"><span class="k">сервер</span><span class="v" id="tjMetaNode">—</span></div>
+          <div class="meta-row"><span class="k">ip</span><span class="v" id="tjMetaIp">—</span></div>
+          <div class="meta-row"><span class="k">пинг</span><span class="v" id="tjMetaMs">— ms</span></div>
+          <div class="meta-row"><span class="k">аптайм</span><span class="v" id="tjMetaUp">—</span></div>
+        </div>
+        <div class="state-hint">→ нажми Connect в моке справа</div>
+      </div>
+
+      <div class="phone" id="phoneTj">
+        <div class="phone-screen tj-screen">
+          <div class="ph-sb">
+        <div>10:39</div>
+        <div class="ph-sb-r">
+          <span class="ph-vpn">VPN</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a14 14 0 0 1 18 0"/><path d="M6 12.5a10 10 0 0 1 12 0"/><path d="M9 16a6 6 0 0 1 6 0"/><circle cx="12" cy="19.5" r=".8" fill="currentColor"/></svg>
+          <span>100%</span>
+        </div>
+      </div>
+          <div class="ph-body">
+            <!-- Telegram action bar -->
+            <div class="tj-action-bar">
+              <button class="ax-icon-btn" type="button" aria-label="back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="20" y1="12" x2="5" y2="12"/><polyline points="11 6 5 12 11 18"/></svg></button>
+              <div class="title-block">
+                <div class="title">VPN Proxy</div>
+                <div class="subtitle" id="tjSubtitle">3 saved · Not connected</div>
+              </div>
+              <button class="ax-icon-btn" type="button" aria-label="more"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/></svg></button>
+            </div>
+
+            <div class="tj-content">
+              <!-- Hero card -->
+              <div class="tj-hero">
+                <div class="row1">
+                  <span class="dot"></span>
+                  <span class="label label-idle">NOT CONNECTED</span>
+                  <span class="label label-on">CONNECTED</span>
+                  <span class="uptime" id="tjUptime">00:42:15</span>
+                </div>
+                <div class="body-idle">
+                  Paste a config link below or select a saved configuration.
+                </div>
+                <div class="server-row">
+                  <div class="flag-tile" style="flex-direction: column;">
+                    <span style="background:#AE1C28;"></span>
+                    <span style="background:#ffffff;"></span>
+                    <span style="background:#21468B;"></span>
+                  </div>
+                  <div class="info">
+                    <div class="nm">Amsterdam · NL-02</div>
+                    <div class="ip">94.142.42.18:443</div>
+                  </div>
+                  <div class="ping-col">
+                    <span class="ping-pips"><span></span><span></span><span></span></span>
+                    <span class="ping-ms">31ms</span>
+                  </div>
+                </div>
+                <div class="tj-stats">
+                  <div class="c"><div class="k">DOWN</div><div class="v">14.1 GB</div></div>
+                  <div class="c"><div class="k">UP</div><div class="v">2.3 GB</div></div>
+                  <div class="c"><div class="k">AUTO</div><div class="v green">ON</div></div>
+                </div>
+                <button class="tj-primary" id="tjBtn" type="button">
+                  <span class="btn-icon-idle"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><polygon points="7 4 20 12 7 20"/></svg></span>
+                  <span class="btn-icon-on"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg></span>
+                  <span class="btn-text-idle">Connect</span>
+                  <span class="btn-text-on">Disconnect</span>
+                </button>
+              </div>
+
+              <!-- Auto-reconnect chip -->
+              <div class="tj-chip">
+                <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 12 3 6 9 6"/><path d="M3 6a9 9 0 0 1 16 4"/><polyline points="21 12 21 18 15 18"/><path d="M21 18a9 9 0 0 1-16-4"/></svg></span>
+                <div class="lbl-block">
+                  <div class="nm">Auto-reconnect</div>
+                  <div class="sub">Restart on network change</div>
+                </div>
+                <div class="sw"><span></span></div>
+              </div>
+
+              <!-- Saved configs -->
+              <div class="tj-section-label">
+                <span class="lbl">Saved configurations</span>
+                <span class="ext">3 / 12</span>
+              </div>
+              <div class="tj-saved">
+                <div class="tj-row" id="tjRow1">
+                  <div class="flag-tile" style="flex-direction: column;">
+                    <span style="background:#AE1C28;"></span>
+                    <span style="background:#ffffff;"></span>
+                    <span style="background:#21468B;"></span>
+                  </div>
+                  <div class="mid">
+                    <div class="head">
+                      <span class="tj-proto-badge">VLESS</span>
+                      <span class="nm">Amsterdam · NL-02</span>
+                    </div>
+                    <div class="ip">94.142.42.18:443</div>
+                  </div>
+                  <div class="right">
+                    <div class="ping">
+                      <span class="ping-pips"><span></span><span></span><span></span></span>
+                      <span>31ms</span>
+                    </div>
+                    <button class="badge-use" type="button">Connect</button>
+                  </div>
+                </div>
+                <div class="tj-row">
+                  <div class="flag-tile" style="flex-direction: row;">
+                    <span style="background:#0055A4;"></span>
+                    <span style="background:#ffffff;"></span>
+                    <span style="background:#EF4135;"></span>
+                  </div>
+                  <div class="mid">
+                    <div class="head">
+                      <span class="tj-proto-badge">VLESS</span>
+                      <span class="nm">Paris · FR-01</span>
+                    </div>
+                    <div class="ip">151.142.42.73:443</div>
+                  </div>
+                  <div class="right">
+                    <div class="ping slow">
+                      <span class="ping-pips slow"><span></span><span></span><span></span></span>
+                      <span>74ms</span>
+                    </div>
+                    <button class="badge-use" type="button">Connect</button>
+                  </div>
+                </div>
+                <div class="tj-row">
+                  <div class="flag-tile" style="flex-direction: column;">
+                    <span style="background:#ffffff;"></span>
+                    <span style="background:#DC143C;"></span>
+                  </div>
+                  <div class="mid">
+                    <div class="head">
+                      <span class="tj-proto-badge">VLESS</span>
+                      <span class="nm">Warsaw · PL-04</span>
+                    </div>
+                    <div class="ip">188.142.42.42:443</div>
+                  </div>
+                  <div class="right">
+                    <div class="ping">
+                      <span class="ping-pips"><span></span><span></span><span></span></span>
+                      <span>38ms</span>
+                    </div>
+                    <button class="badge-use" type="button">Connect</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ph-home"><span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── RU SERVER ─────────── -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Российский <em>сервер.</em></h2>
+        <div class="section-sub">
+          Единственный VPN, который думает в обе стороны: спрятать тебя в Россию, или достать Россию из-за рубежа.
+        </div>
+      </div>
+      <span class="section-num">04 / Эксклюзив</span>
+    </div>
+
+    <div class="ru">
+      <div class="ru-left">
+        <span class="ru-tag">Доступен в тарифе «Максимальный»</span>
+        <h3 class="ru-title">Маскировка <em>в обе стороны.</em></h3>
+        <div class="ru-body">
+          <b>Из-за рубежа</b> — открываешь Госуслуги, Тинькофф и любой .ru-сервис без капчи и блокировок. <br/><br/>
+          <b>Внутри страны</b> — твой международный трафик прячется за российским IP, выглядит как обычный пользователь.
+        </div>
+      </div>
+      <div class="ru-right">
+        <div class="ru-row">
+          <div class="ic">→</div>
+          <div class="txt"><b>Международный трафик</b> скрыт за российским IP.<br/><span>Никаких «иностранных подключений» в логах провайдера.</span></div>
+        </div>
+        <div class="ru-row">
+          <div class="ic">←</div>
+          <div class="txt"><b>Российские сервисы</b> работают из-за рубежа.<br/><span>Госуслуги, банки, такси, маркетплейсы — как из Москвы.</span></div>
+        </div>
+        <div class="ru-row">
+          <div class="ic">⇄</div>
+          <div class="txt"><b>Умная маршрутизация</b>.<br/><span>.ru и российские IP идут напрямую, остальное — в туннель. Netflix и Госуслуги одновременно, без переключений.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- routing diagram -->
+    <div class="routing">
+      <div class="routing-title">как работает умная маршрутизация</div>
+      <div class="routing-flow">
+        <div class="route-line direct">
+          <div class="route-src">gosuslugi.ru</div>
+          <div class="route-arrow"><span class="label">direct</span></div>
+          <div class="route-dst">прямое соединение</div>
+        </div>
+        <div class="route-line tunnel">
+          <div class="route-src">netflix.com</div>
+          <div class="route-arrow"><span class="label">tunnel</span></div>
+          <div class="route-dst">через NL / FR / PL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── PRODUCTS (apps) ─────────── -->
+<section class="section" id="products">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Свои <em>приложения.</em></h2>
+        <div class="section-sub">
+          Не сторонние клиенты с подкрученными настройками — собственные продукты, заточенные под нашу сеть.
+        </div>
+      </div>
+      <span class="section-num">05 / Продукты</span>
+    </div>
+
+    <div class="apps">
+      <!-- AxiOm app card -->
+      <div class="app tilt">
+        <div class="app-mark">
+          <svg viewBox="0 0 100 100" width="100" height="100">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#3da4ff" stroke-width="2"/>
+            <ellipse cx="50" cy="50" rx="19" ry="46" fill="none" stroke="#3da4ff" stroke-width="0.9" opacity="0.55"/>
+            <line x1="4" y1="50" x2="96" y2="50" stroke="#3da4ff" stroke-width="0.9" opacity="0.4"/>
+            <text x="50" y="50" text-anchor="middle" dominant-baseline="central"
+                  font-family="Inter, sans-serif" font-weight="500" font-size="58" fill="#3da4ff">Ω</text>
+          </svg>
+        </div>
+        <div>
+          <div class="app-name">Axi<span class="o">Ω</span>m</div>
+          <div class="app-tag">VPN-клиент со сплит-туннелированием</div>
+        </div>
+        <div class="app-body">
+          Сам выбираешь, какие приложения идут через VPN, а какие — напрямую. По домену, по IP, по процессу. iOS, Android, macOS, Windows, Linux.
+        </div>
+        <div class="app-stack">
+          <span>split-tunnel</span>
+          <span>multi-platform</span>
+          <span>state machine</span>
+        </div>
+      </div>
+
+      <!-- Tejar app card -->
+      <div class="app tejar tilt tilt-tg">
+        <div class="app-mark">
+          <svg viewBox="0 0 100 100" width="100" height="100">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#4ab4e6" stroke-width="2"/>
+            <ellipse cx="50" cy="50" rx="19" ry="46" fill="none" stroke="#4ab4e6" stroke-width="0.9" opacity="0.55"/>
+            <line x1="4" y1="50" x2="96" y2="50" stroke="#4ab4e6" stroke-width="0.9" opacity="0.4"/>
+            <path d="M 14 75 Q 35 56 55 50" stroke="#229ED9" stroke-width="1.4" fill="none" stroke-dasharray="2.5 3" opacity="0.7"/>
+            <g transform="translate(50, 50) rotate(-6) scale(0.5)">
+              <path d="M 60 -38 L -64 19 L -38 45 L -22 19 L -4 49 L 41 64 Z" fill="#229ED9" />
+            </g>
+            <circle cx="14" cy="75" r="2" fill="#229ED9"/>
+          </svg>
+        </div>
+        <div>
+          <div class="app-name">Tejar</div>
+          <div class="app-tag">Форк Telegram со встроенным прокси</div>
+        </div>
+        <div class="app-body">
+          Не отдельное приложение, не сторонний бот — прокси встроен в мессенджер. Открываешь и пишешь. Те же чаты, те же боты, тот же логин. Работает там, где обычный Telegram заблокирован.
+        </div>
+        <div class="app-stack">
+          <span>zero-config</span>
+          <span>same UX</span>
+          <span>powered by AxiOm</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── PRICING ─────────── -->
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Два тарифа. <em>Никакой ваты.</em></h2>
+        <div class="section-sub">
+          Платишь только за то, что используешь: серверы, протоколы, устройства. Без автопродления и «бесплатной недели за карту».
+        </div>
+      </div>
+      <span class="section-num">06 / Тарифы</span>
+    </div>
+
+    <div class="prices">
+      <div class="price tilt">
+        <div>
+          <div class="price-tier">/ Стандарт</div>
+          <div class="price-name" style="margin-top:8px;">Базовая свобода</div>
+        </div>
+        <div class="price-num">
+          <b>200</b><span class="cur">₽</span><span class="per">/ мес</span>
+          <span class="price-disc">−20% год</span>
+        </div>
+        <div class="price-features">
+          <div>Серверы NL · FR · PL</div>
+          <div>Протоколы TCP · Reality</div>
+          <div>Режим WARP</div>
+          <div class="muted">5 устройств <span style="color:var(--very-dim)">или</span> 210 ГБ / мес</div>
+        </div>
+        <button type="button" class="btn" onclick="openBuyModal(0)">
+          Купить «Стандарт» <span class="arr">→</span>
+        </button>
+      </div>
+
+      <div class="price featured tilt">
+        <div class="price-badge">Популярный</div>
+        <div>
+          <div class="price-tier">/ Максимальный 🔥</div>
+          <div class="price-name" style="margin-top:8px;">Полный арсенал</div>
+        </div>
+        <div class="price-num">
+          <b>400</b><span class="cur">₽</span><span class="per">/ мес</span>
+          <span class="price-disc">−20% год</span>
+        </div>
+        <div class="price-features">
+          <div>Всё из «Стандарта»</div>
+          <div>+ Сервер в России</div>
+          <div>+ Протокол WS · обход DPI</div>
+          <div>+ Маскировка через RU</div>
+          <div class="muted">15 устройств <span style="color:var(--very-dim)">или</span> 1 000 ГБ / мес</div>
+        </div>
+        <button type="button" class="btn primary" onclick="openBuyModal(1)">
+          Купить «Максимальный» <span class="arr">→</span>
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top:24px; text-align:center;">
+      <button type="button" class="mono accent compare-link" id="openCompare"
+         style="background:none; border:none; cursor:pointer; font: inherit; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; text-decoration-thickness: 0.5px; text-underline-offset: 4px;">
+        Полное сравнение тарифов ↗
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── TELEGRAM ─────────── -->
+<section class="section tg-section" id="telegram">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Где мы <em>живём.</em></h2>
+        <div class="section-sub">
+          AxiOm живёт в Telegram. Покупка, поддержка, обновления — три бота, никаких форм и личных кабинетов.
+        </div>
+      </div>
+      <span class="section-num">07 / Контакты</span>
+    </div>
+
+    <div class="tg-grid">
+      <a class="tg-card tilt tilt-tg" href="https://t.me/COMMUNITY" target="_blank" rel="noopener">
+        <div class="tg-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+            <path d="M 21 4 L 2 11 L 9 13 L 11 21 L 15 17 L 19 21 Z"/>
+          </svg>
+        </div>
+        <div class="tg-role">Канал</div>
+        <div class="tg-handle">@COMMUNITY</div>
+        <div class="tg-desc">Новости, обновления, разборы блокировок, конкурсы.</div>
+        <div class="tg-cta">Подписаться →</div>
+      </a>
+      <a class="tg-card tilt tilt-tg" href="https://t.me/BUY_BOT" target="_blank" rel="noopener">
+        <div class="tg-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="20" r="1"/>
+            <circle cx="18" cy="20" r="1"/>
+            <path d="M3 4h2l2.5 12h10L20 7H6.2"/>
+          </svg>
+        </div>
+        <div class="tg-role">Покупка</div>
+        <div class="tg-handle">@BUY_BOT</div>
+        <div class="tg-desc">Бот для оформления подписки. Карта и СБП — без посредников.</div>
+        <div class="tg-cta">Купить →</div>
+      </a>
+      <a class="tg-card tilt tilt-tg" href="https://t.me/SUPPORT_BOT" target="_blank" rel="noopener">
+        <div class="tg-ic">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/>
+          </svg>
+        </div>
+        <div class="tg-role">Поддержка</div>
+        <div class="tg-handle">@SUPPORT_BOT</div>
+        <div class="tg-desc">Живые люди с 9:00 до 23:00. Помогут с настройкой и решат проблему.</div>
+        <div class="tg-cta">Написать →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── CLOSING ─────────── -->
+<section class="closing">
+  <div class="wrap">
+    <h2 class="closing-headline">Интернет без границ —<br/><em>это не лозунг.</em></h2>
+    <div class="closing-sub">Это настройка. Открой Telegram, нажми «Купить» — и через минуту ты на свободе.</div>
+    <div class="closing-actions">
+      <a class="btn primary" href="https://t.me/BUY_BOT" target="_blank" rel="noopener">
+        Купить подписку <span class="arr">→</span>
+      </a>
+      <a class="btn" href="https://t.me/COMMUNITY" target="_blank" rel="noopener">
+        Telegram-канал <span class="arr">↗</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────── FOOTER ─────────── -->
+<div class="footer-wrap">
+  <div class="wrap">
+    <div class="footer">
+      <div class="brand-blk">
+        <span>Axi<span class="o">Ω</span>m</span>
+        <span style="font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--dim); letter-spacing:2px;">VPN · 2026</span>
+      </div>
+      <div>Свобода — аксиома · © 2026</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── INTERACTIONS ─────────── -->
+<script>
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ─── Generic tilt + spotlight ───
+  if (!prefersReduced) {
+    document.querySelectorAll('.tilt').forEach(el => {
+      let raf = 0;
+      el.addEventListener('mousemove', (e) => {
+        const rect = el.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top)  / rect.height;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const maxTilt = rect.width < 280 ? 6 : 8;
+          const rx = (0.5 - y) * maxTilt;
+          const ry = (x - 0.5) * maxTilt * 1.4;
+          // inline transform so it wins over any class-based transform (e.g. .reveal-lr.in > *)
+          el.style.transform =
+            `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+          el.style.setProperty('--mx', (x * 100) + '%');
+          el.style.setProperty('--my', (y * 100) + '%');
+        });
+      });
+      el.addEventListener('mouseleave', () => {
+        cancelAnimationFrame(raf);
+        el.style.transform =
+          'perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+      });
+    });
+  }
+
+  // ─── Hero sphere parallax ───
+  if (!prefersReduced) {
+    const hero = document.querySelector('.hero');
+    const mark = document.querySelector('.hero-mark svg');
+    if (hero && mark) {
+      let raf = 0;
+      hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width  - 0.5;
+        const y = (e.clientY - rect.top)  / rect.height - 0.5;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          mark.style.setProperty('--hrx', (-y * 14) + 'deg');
+          mark.style.setProperty('--hry', ( x * 18) + 'deg');
+        });
+      });
+      hero.addEventListener('mouseleave', () => {
+        mark.style.setProperty('--hrx', '0deg');
+        mark.style.setProperty('--hry', '0deg');
+      });
+    }
+  }
+
+  // ─── Phone mocks: independent state per phone (AxiOm + Tejar) ───
+  const AX_NODES = [
+    { name: 'Amsterdam · NL-02', ip: '94.*.*.211', ms: '31', proto: 'VLESS Reality',
+      flag: ['#AE1C28','#ffffff','#21468B'], dir: 'column' },
+    { name: 'Paris · FR-01',     ip: '151.*.*.73', ms: '74', proto: 'VLESS Reality',
+      flag: ['#0055A4','#ffffff','#EF4135'], dir: 'row' },
+    { name: 'Warsaw · PL-04',    ip: '188.*.*.42', ms: '38', proto: 'VLESS Reality',
+      flag: ['#ffffff','#DC143C'],           dir: 'column' },
+    { name: 'Moscow · RU-09',    ip: '95.*.*.176', ms: '14', proto: 'VLESS Reality',
+      flag: ['#ffffff','#0039A6','#D52B1E'], dir: 'column' },
+  ];
+
+  function paintFlag(el, colors, dir) {
+    el.innerHTML = '';
+    el.style.flexDirection = dir;
+    colors.forEach(c => {
+      const span = document.createElement('span');
+      span.style.background = c;
+      el.appendChild(span);
+    });
+  }
+
+  // ── AxiOm phone ──
+  (function setupAxPhone(){
+    const phones = document.getElementById('phonesAx');
+    const btn    = document.getElementById('axBtn');
+    if (!phones || !btn) return;
+    const $ = id => document.getElementById(id);
+    function setState(on) {
+      btn.setAttribute('aria-pressed', String(on));
+      phones.setAttribute('data-state', on ? 'active' : 'idle');
+      if (on) {
+        const node = AX_NODES[Math.floor(Math.random() * AX_NODES.length)];
+        $('axStatus').innerHTML = 'Защищено · <span style="font-family:\'JetBrains Mono\', monospace; font-weight:500;">00:42:15</span>';
+        $('axPing').textContent  = node.ms + 'мс';
+        $('axServerName').textContent = node.name;
+        $('axServerIp').textContent   = node.ip;
+        $('axServerPing').innerHTML   = "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 9a14 14 0 0 1 18 0\"/><path d=\"M6 12.5a10 10 0 0 1 12 0\"/><path d=\"M9 16a6 6 0 0 1 6 0\"/><circle cx=\"12\" cy=\"19.5\" r=\"1\" fill=\"currentColor\"/></svg> <span>" + node.ms + 'мс</span>';
+        paintFlag($('axFlag'), node.flag, node.dir);
+
+        $('axEyebrow').textContent = 'состояние · защищено';
+        $('axTitle').innerHTML     = 'После <em>нажатия.</em>';
+        $('axBody').textContent    = 'Большая Ω зеленеет, символ в AppBar становится status-light\'ом. Трафик в туннеле, ping вживую в Stats Row, сервер выбран автоматически — кратчайший до тебя.';
+        $('axMetaNode').textContent  = node.name;
+        $('axMetaIp').textContent    = node.ip;
+        $('axMetaMs').textContent    = node.ms + ' ms';
+        $('axMetaProto').textContent = node.proto;
+      } else {
+        $('axStatus').textContent = 'Готов к подключению';
+        $('axPing').textContent   = '—';
+        $('axServerName').textContent = 'Сервер не выбран';
+        $('axServerIp').textContent   = '—';
+        $('axServerPing').innerHTML   = "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 9a14 14 0 0 1 18 0\"/><path d=\"M6 12.5a10 10 0 0 1 12 0\"/><path d=\"M9 16a6 6 0 0 1 6 0\"/><circle cx=\"12\" cy=\"19.5\" r=\"1\" fill=\"currentColor\"/></svg> <span>—</span>";
+        paintFlag($('axFlag'), ['#2a3552','#3a466e','#2a3552'], 'column');
+
+        $('axEyebrow').textContent = 'состояние · offline';
+        $('axTitle').innerHTML     = 'До <em>нажатия.</em>';
+        $('axBody').textContent    = 'Один экран. Одна кнопка. Профиль свёрнут в chip, всё остальное — под контролем. Нажми Ω — внешний трафик уходит в туннель, домены .ru остаются прямыми.';
+        $('axMetaNode').textContent  = '—';
+        $('axMetaIp').textContent    = '—';
+        $('axMetaMs').textContent    = '— ms';
+        $('axMetaProto').textContent = '—';
+      }
+    }
+    btn.addEventListener('click', () => {
+      setState(phones.getAttribute('data-state') !== 'active');
+    });
+  })();
+
+  // ── Tejar phone ──
+  (function setupTjPhone(){
+    const phones = document.getElementById('phonesTj');
+    const btn    = document.getElementById('tjBtn');
+    if (!phones || !btn) return;
+    const $ = id => document.getElementById(id);
+    function setState(on) {
+      phones.setAttribute('data-state', on ? 'active' : 'idle');
+      if (on) {
+        $('tjSubtitle').textContent = 'Amsterdam · NL-02 · Connected';
+        $('tjEyebrow').textContent  = 'состояние · connected';
+        $('tjTitle').innerHTML      = 'Туннель <em>активен.</em>';
+        $('tjBody').innerHTML       = 'Hero-карточка меняет тинт на зелёный, появляются ping, аптайм и метрики DOWN / UP / AUTO. <b>Auto-reconnect</b> переподключит при смене сети, ты этого даже не заметишь.';
+        $('tjMetaNode').textContent = 'Amsterdam · NL-02';
+        $('tjMetaIp').textContent   = '94.142.42.18:443';
+        $('tjMetaMs').textContent   = '31 ms';
+        $('tjMetaUp').textContent   = '00:42:15';
+      } else {
+        $('tjSubtitle').textContent = '3 saved · Not connected';
+        $('tjEyebrow').textContent  = 'состояние · not connected';
+        $('tjTitle').innerHTML      = 'Прокси <em>внутри Telegram.</em>';
+        $('tjBody').innerHTML       = 'Не отдельное приложение. Не сторонний бот. Настройки прокси встроены в сам мессенджер — открыл, вставил VLESS-ссылку, подключился. <b>Telegram работает даже там, где он заблокирован.</b>';
+        $('tjMetaNode').textContent = '—';
+        $('tjMetaIp').textContent   = '—';
+        $('tjMetaMs').textContent   = '— ms';
+        $('tjMetaUp').textContent   = '—';
+      }
+    }
+    btn.addEventListener('click', () => {
+      setState(phones.getAttribute('data-state') !== 'active');
+    });
+  })();
+
+  // ─── Stat count-up on viewport entry ───
+  if (!prefersReduced && 'IntersectionObserver' in window) {
+    const formatNum = (n, target) => {
+      // preserve formatting: integers, no decimals here
+      return String(Math.round(n));
+    };
+    const animateNum = (el, target, dur=900) => {
+      const start = performance.now();
+      const from = 0;
+      function frame(t) {
+        const k = Math.min(1, (t - start) / dur);
+        const eased = 1 - Math.pow(1 - k, 3); // ease-out cubic
+        const v = from + (target - from) * eased;
+        el.textContent = formatNum(v, target);
+        if (k < 1) requestAnimationFrame(frame);
+        else el.textContent = String(target);
+      }
+      requestAnimationFrame(frame);
+    };
+    const seen = new WeakSet();
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting && !seen.has(en.target)) {
+          seen.add(en.target);
+          en.target.querySelectorAll('.stat-num').forEach(el => {
+            // first text node is the number
+            const m = el.firstChild;
+            if (!m || m.nodeType !== Node.TEXT_NODE) return;
+            const target = parseInt(m.textContent.replace(/\D/g,''), 10);
+            if (!Number.isFinite(target) || target < 2) return;
+            m.textContent = '0';
+            animateNum({ set textContent(v){ m.textContent = v; } }, target);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.stats').forEach(s => io.observe(s));
+  }
+  // ─── Scrollytelling reveals ───
+  (function setupReveals(){
+    if (prefersReduced) return;
+
+    // selectors → reveal variant
+    const TARGETS = [
+      // hero comes alive on load (already in viewport)
+      ['.hero-grid',       'lr'],
+      // stats row staggers
+      ['.stats-grid',      'stagger'],
+      // every section head fades up
+      ['.section-head',    'fade'],
+      // feature cards
+      ['.feat-grid',       'stagger'],
+      // countries
+      ['.countries',       'stagger'],
+      // phone showcase (text + phone from sides)
+      ['.phones-i',        'lr'],
+      // RU server callout (left/right)
+      ['.ru',              'lr'],
+      // routing diagram
+      ['.routing',         'fade'],
+      // app cards
+      ['.apps',            'stagger'],
+      // pricing
+      ['.prices',          'stagger'],
+      // telegram cards
+      ['.tg-grid',         'stagger'],
+      // closing
+      ['.closing .wrap',   'fade'],
+    ];
+
+    TARGETS.forEach(([sel, variant]) => {
+      document.querySelectorAll(sel).forEach(el => {
+        if (variant === 'stagger')      el.classList.add('reveal-stagger');
+        else if (variant === 'lr')      el.classList.add('reveal-lr');
+        else                            el.classList.add('reveal'); // fade
+      });
+    });
+
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+        } else {
+          en.target.classList.remove('in');
+        }
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -8% 0px',
+    });
+
+    document.querySelectorAll('.reveal, .reveal-stagger, .reveal-lr')
+            .forEach(el => io.observe(el));
+  })();
+})();
+</script>
+
+<!-- ─────────── 3D & enhanced animations ─────────── -->
+<script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+<script>
+(function(){
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ── Routing particles ──
+  document.querySelectorAll('.route-arrow').forEach((el, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.style.animationDelay = (i * 0.45) + 's';
+    el.appendChild(dot);
+  });
+
+  // ── Closing-section floating Ω ──
+  const closingWrap = document.querySelector('.closing .wrap');
+  if (closingWrap && closingWrap.parentNode) {
+    const big = document.createElement('div');
+    big.className = 'closing-omega';
+    big.textContent = 'Ω';
+    closingWrap.parentNode.insertBefore(big, closingWrap);
+  }
+
+  if (prefersReduced) return;
+
+  // ── 3D wireframe sphere in hero ──
+  function init3D() {
+    const mount = document.getElementById('hero3d');
+    if (!mount || !window.THREE) return;
+    const W0 = mount.clientWidth  || 460;
+    const H0 = mount.clientHeight || 460;
+    if (W0 < 80 || H0 < 80) return; // mount not laid out yet, skip
+
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    } catch(e) { return; }
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(38, W0/H0, 0.1, 100);
+    camera.position.z = 5.8;
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(W0, H0);
+    renderer.setClearColor(0x000000, 0);
+    mount.appendChild(renderer.domElement);
+    document.body.classList.add('has-3d');
+
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const COLOR = 0x3da4ff;
+    const matStrong = new THREE.LineBasicMaterial({ color: COLOR, transparent: true, opacity: 0.9 });
+    const matMid    = new THREE.LineBasicMaterial({ color: COLOR, transparent: true, opacity: 0.55 });
+    const matFaint  = new THREE.LineBasicMaterial({ color: COLOR, transparent: true, opacity: 0.22 });
+
+    function ring(radius, segs, axis, mat) {
+      const pts = [];
+      for (let i = 0; i <= segs; i++) {
+        const a = (i / segs) * Math.PI * 2;
+        const c = Math.cos(a) * radius;
+        const s = Math.sin(a) * radius;
+        if (axis === 'z') pts.push(new THREE.Vector3(c, s, 0));
+        if (axis === 'x') pts.push(new THREE.Vector3(0, c, s));
+        if (axis === 'y') pts.push(new THREE.Vector3(c, 0, s));
+      }
+      return new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat);
+    }
+
+    const R = 1.65;
+    // outer equator
+    group.add(ring(R, 96, 'z', matStrong));
+    // 4 meridians (vertical great circles, rotated around Y)
+    for (let i = 0; i < 4; i++) {
+      const m = ring(R, 96, 'x', i === 0 ? matMid : matFaint);
+      m.rotation.y = (i * Math.PI) / 4;
+      group.add(m);
+    }
+    // 6 latitudes
+    for (let i = 1; i < 4; i++) {
+      const y = (i / 4) * R * 0.96;
+      const r = Math.sqrt(R*R - y*y);
+      const lat1 = ring(r, 80, 'y', matFaint); lat1.position.y =  y; group.add(lat1);
+      const lat2 = ring(r, 80, 'y', matFaint); lat2.position.y = -y; group.add(lat2);
+    }
+
+    // Ω as billboard sprite (canvas texture, always faces camera)
+    function makeOmegaTex() {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const x = c.getContext('2d');
+      x.font = '500 380px "Inter", sans-serif';
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      // soft glow
+      x.shadowColor = 'rgba(61,164,255,0.85)';
+      x.shadowBlur  = 28;
+      x.fillStyle   = '#3da4ff';
+      x.fillText('Ω', 256, 280);
+      // solid on top
+      x.shadowBlur  = 0;
+      x.fillText('Ω', 256, 280);
+      const tex = new THREE.CanvasTexture(c);
+      tex.anisotropy = 4;
+      tex.minFilter = THREE.LinearFilter;
+      return tex;
+    }
+    const omega = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeOmegaTex(), transparent: true, depthWrite: false,
+    }));
+    omega.scale.set(2.6, 2.6, 1);
+    scene.add(omega);
+
+    // particle dust around the sphere
+    const PCOUNT = 90;
+    const ppos = new Float32Array(PCOUNT * 3);
+    for (let i = 0; i < PCOUNT; i++) {
+      const t = Math.random() * Math.PI * 2;
+      const u = Math.acos(2*Math.random() - 1);
+      const rr = R * (1.05 + Math.random() * 0.55);
+      ppos[i*3]     = rr * Math.sin(u) * Math.cos(t);
+      ppos[i*3 + 1] = rr * Math.cos(u);
+      ppos[i*3 + 2] = rr * Math.sin(u) * Math.sin(t);
+    }
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
+    const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+      color: COLOR, size: 0.045, transparent: true, opacity: 0.7, sizeAttenuation: true,
+    }));
+    scene.add(particles);
+
+    // mouse parallax on the whole hero
+    let targetX = 0, targetY = 0, curX = 0, curY = 0;
+    const hero = document.querySelector('.hero');
+    if (hero) {
+      hero.addEventListener('mousemove', (e) => {
+        const r = hero.getBoundingClientRect();
+        targetX = ((e.clientX - r.left) / r.width  - 0.5) *  0.7;
+        targetY = ((e.clientY - r.top)  / r.height - 0.5) * -0.4;
+      });
+      hero.addEventListener('mouseleave', () => { targetX = 0; targetY = 0; });
+    }
+
+    // pause when offscreen
+    let running = true;
+    const io = new IntersectionObserver((ents) => {
+      ents.forEach(e => { running = e.isIntersecting; });
+    }, { threshold: 0 });
+    io.observe(mount);
+
+    const clock = new THREE.Clock();
+    function loop() {
+      requestAnimationFrame(loop);
+      if (!running) return;
+      const t = clock.getElapsedTime();
+
+      curX += (targetX - curX) * 0.06;
+      curY += (targetY - curY) * 0.06;
+
+      group.rotation.y = t * 0.22 + curX;
+      group.rotation.x = Math.sin(t * 0.35) * 0.14 + curY;
+
+      particles.rotation.y = -t * 0.07;
+      particles.rotation.x = Math.cos(t * 0.18) * 0.18;
+
+      const pulse = 1 + Math.sin(t * 1.4) * 0.025;
+      omega.scale.set(2.6 * pulse, 2.6 * pulse, 1);
+
+      renderer.render(scene, camera);
+    }
+    loop();
+
+    function onResize() {
+      const w = mount.clientWidth, h = mount.clientHeight;
+      if (!w || !h) return;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }
+    window.addEventListener('resize', onResize);
+  }
+
+  // wait until fonts are ready so the Ω glyph renders correctly into the texture
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => setTimeout(init3D, 50));
+  } else {
+    setTimeout(init3D, 100);
+  }
+})();
+</script>
+
+<!-- ─────────── PRICING COMPARISON MODAL ─────────── -->
+<div class="cmp-overlay" id="cmpOverlay" role="dialog" aria-modal="true" aria-labelledby="cmpTitle">
+  <div class="cmp-modal">
+    <div class="cmp-head">
+      <div>
+        <div class="eyebrow">Сравнение тарифов</div>
+        <div class="ttl" id="cmpTitle">Что входит в <em>каждый план.</em></div>
+      </div>
+      <button class="cmp-close" id="cmpClose" type="button" aria-label="Закрыть">×</button>
+    </div>
+
+    <div class="cmp-billing">
+      <div class="seg" id="cmpSeg">
+        <button type="button" class="act" data-bill="month">Помесячно</button>
+        <button type="button" data-bill="year">На год</button>
+      </div>
+      <span class="save" id="cmpSave">&nbsp;</span>
+    </div>
+
+    <div class="cmp-scroll">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="plan-col">
+              <div class="cmp-plan-tier">/ Стандарт</div>
+              <div class="cmp-plan-name">Базовая свобода</div>
+              <div class="cmp-plan-price" data-price="std">
+                <span class="amt">200</span><span class="cur">₽</span>
+                <span class="per">/ мес</span>
+              </div>
+            </th>
+            <th class="plan-col feat">
+              <div class="cmp-plan-tier">/ Максимальный 🔥</div>
+              <div class="cmp-plan-name">Полный арсенал</div>
+              <div class="cmp-plan-price" data-price="max">
+                <span class="amt">400</span><span class="cur">₽</span>
+                <span class="per">/ мес</span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="grp"><td class="grp-label">Серверы и локации</td><td></td><td class="feat-bg"></td></tr>
+          <tr>
+            <td class="feature-name">Европа <span>Нидерланды · Франция · Польша</span></td>
+            <td class="cell"><span class="cmp-yes">✓</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feature-name">Сервер в России <span>маскировка отечественного трафика</span></td>
+            <td class="cell"><span class="cmp-no">—</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feature-name">Умная маршрутизация <span>.ru напрямую, остальное в туннель</span></td>
+            <td class="cell"><span class="cmp-yes">✓</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+
+          <tr class="grp"><td class="grp-label">Протоколы</td><td></td><td class="feat-bg"></td></tr>
+          <tr>
+            <td class="feature-name">TCP · Reality <span>базовое шифрование VLESS</span></td>
+            <td class="cell"><span class="cmp-yes">✓</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feature-name">WebSocket · обход DPI <span>работает там, где блокируют всё</span></td>
+            <td class="cell"><span class="cmp-no">—</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feature-name">Режим WARP <span>оболочка поверх туннеля</span></td>
+            <td class="cell"><span class="cmp-yes">✓</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+
+          <tr class="grp"><td class="grp-label">Лимиты</td><td></td><td class="feat-bg"></td></tr>
+          <tr>
+            <td class="feature-name">Устройства</td>
+            <td class="cell">5</td>
+            <td class="cell feat-bg">15</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Трафик в месяц</td>
+            <td class="cell">210 ГБ</td>
+            <td class="cell feat-bg">1 000 ГБ</td>
+          </tr>
+          <tr>
+            <td class="feature-name">Скорость</td>
+            <td class="cell">до 100 Мбит/с</td>
+            <td class="cell feat-bg"><span style="color:var(--blue-soft);">без лимита</span></td>
+          </tr>
+
+          <tr class="grp"><td class="grp-label">Поддержка</td><td></td><td class="feat-bg"></td></tr>
+          <tr>
+            <td class="feature-name">Tejar — Telegram с прокси</td>
+            <td class="cell"><span class="cmp-yes">✓</span></td>
+            <td class="cell feat-bg"><span class="cmp-yes">✓</span></td>
+          </tr>
+          <tr>
+            <td class="feature-name">Поддержка в Telegram</td>
+            <td class="cell"><span class="muted">в течение дня</span></td>
+            <td class="cell feat-bg"><span style="color:var(--blue-soft);">приоритетная</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="cmp-foot">
+        <div class="fcell"></div>
+        <div class="fcell">
+          <button type="button" class="btn" onclick="closeCmp();openBuyModal(0)">
+            Купить «Стандарт» <span class="arr">→</span>
+          </button>
+        </div>
+        <div class="fcell">
+          <button type="button" class="btn primary" onclick="closeCmp();openBuyModal(1)">
+            Купить «Максимальный» <span class="arr">→</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── Pricing comparison modal ───
+  (function setupCompare(){
+    const overlay = document.getElementById('cmpOverlay');
+    const openBtn = document.getElementById('openCompare');
+    const closeBtn = document.getElementById('cmpClose');
+    const seg = document.getElementById('cmpSeg');
+    const save = document.getElementById('cmpSave');
+    if (!overlay || !openBtn) return;
+
+    const PRICES = {
+      std: { month: 200, year: 160 },
+      max: { month: 400, year: 320 },
+    };
+
+    function applyBilling(mode) {
+      seg.querySelectorAll('button').forEach(b =>
+        b.classList.toggle('act', b.dataset.bill === mode));
+      overlay.querySelectorAll('.cmp-plan-price').forEach(p => {
+        const key = p.dataset.price;
+        p.querySelector('.amt').textContent = PRICES[key][mode];
+        p.querySelector('.per').textContent = mode === 'year' ? '/ мес · оплата за год' : '/ мес';
+      });
+      save.innerHTML = mode === 'year' ? '↓ экономия 20% на годовой оплате' : '&nbsp;';
+    }
+
+    let lastFocus = null;
+    function open() {
+      lastFocus = document.activeElement;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    }
+    function close() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    openBtn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+    });
+    seg.addEventListener('click', e => {
+      const b = e.target.closest('button[data-bill]');
+      if (b) applyBilling(b.dataset.bill);
+    });
+    applyBilling('month');
+  })();
+    // ─── Sticky thead in comparison table (CSS sticky broken by overflow:hidden on modal) ───
+    (function() {
+      const scrollEl = document.querySelector('.cmp-scroll');
+      const thead = document.querySelector('.cmp-table thead');
+      if (!scrollEl || !thead) return;
+      scrollEl.addEventListener('scroll', function() {
+        thead.style.transform = 'translateY(' + this.scrollTop + 'px)';
+      });
+    })();
+
+</script>
+
+
+<!-- ─────────── BUY MODAL ─────────── -->
+<div class="buy-overlay" id="buyOverlay" role="dialog" aria-modal="true" aria-labelledby="buyTitle">
+  <div class="buy-modal">
+    <div class="buy-head">
+      <div>
+        <div class="eyebrow" id="buyEyebrow">Оформление</div>
+        <div class="ttl" id="buyTitle">Выбери <em>тариф.</em></div>
+      </div>
+      <button class="cmp-close" id="buyClose" type="button" aria-label="Закрыть">×</button>
+    </div>
+
+    <!-- STEP 1: tariff picker -->
+    <div class="buy-step" id="buyStep1">
+      <div class="buy-seg-row">
+        <div class="seg buy-seg" id="buySeg1">
+          <button type="button" class="act" data-plan="0">Стандарт</button>
+          <button type="button" data-plan="1">Максимальный</button>
+        </div>
+      </div>
+
+      <div class="buy-seg-row" style="margin-top:12px;">
+        <div class="seg buy-seg" id="buySeg2">
+          <button type="button" class="act" data-period="0">Месяц</button>
+          <button type="button" data-period="1">Год <span class="save-tag">−20%</span></button>
+        </div>
+        <div class="seg buy-seg" id="buySeg3" style="margin-top:0;">
+          <button type="button" class="act" data-limit="0">Устройства</button>
+          <button type="button" data-limit="1">Трафик</button>
+        </div>
+      </div>
+
+      <div class="buy-card" id="buyCard">
+        <div class="buy-card-top">
+          <div>
+            <div class="buy-plan-tier" id="buyCardTier">/ Стандарт</div>
+            <div class="buy-plan-name" id="buyCardName">Базовая свобода</div>
+          </div>
+          <div class="buy-price-block">
+            <div class="buy-price-num"><span id="buyCardPrice">200</span><span class="cur">₽</span></div>
+            <div class="buy-price-per" id="buyCardPer">/ месяц</div>
+          </div>
+        </div>
+        <div class="buy-card-feats" id="buyCardFeats"></div>
+      </div>
+
+      <div class="buy-promo-row" style="margin-top:14px; display:flex; gap:8px;">
+        <input id="buyPromo" type="text" placeholder="Промокод" autocomplete="off" spellcheck="false"
+               style="flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:transparent; color:inherit; text-transform:uppercase;">
+        <button type="button" class="btn" id="buyPromoApply" style="white-space:nowrap;">Применить</button>
+      </div>
+      <div id="buyPromoMsg" style="margin-top:8px; font-size:13px; min-height:18px;"></div>
+
+      <div class="buy-pay-btns">
+        <button type="button" class="btn primary buy-pay-btn" id="buyBtnCard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Оплатить картой
+        </button>
+        <button type="button" class="btn buy-pay-btn" id="buyBtnSbp">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Оплатить по СБП
+        </button>
+      </div>
+      <div class="buy-note">Без автопродления · Безопасная оплата через Платёжку</div>
+    </div>
+
+    <!-- STEP 2: loading / success / error -->
+    <div class="buy-step" id="buyStep2" style="display:none; text-align:center;">
+      <div id="buyLoading">
+        <div class="buy-spinner"></div>
+        <div style="margin-top:20px; color:var(--dim);">Проверяем оплату…</div>
+      </div>
+      <div id="buySuccess" style="display:none;">
+        <div class="buy-success-icon">✓</div>
+        <div class="buy-success-title">Оплата получена!</div>
+        <div class="buy-success-sub">Ссылка на подписку — вставь в <strong>AxiOm</strong> или любой совместимый клиент:</div>
+        <div class="buy-sub-box">
+          <code id="buySubUrl"></code>
+          <button type="button" class="buy-copy-btn" id="buyCopyBtn" title="Скопировать">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <a id="buyClaimBtn" href="https://t.me/BUY_BOT" target="_blank" rel="noopener" class="btn primary" style="margin-top:16px; display:inline-flex; align-items:center; gap:8px;">
+          Привязать к Telegram-боту →
+        </a>
+        <div style="margin-top:10px; font-size:12px; color:var(--dim);">Привяжи подписку к боту — в личном кабинете будут трафик, срок и продление.</div>
+        <div style="margin-top:8px; font-size:12px; color:var(--dim);">Также работает в Hiddify, Nekoray, v2rayNG</div>
+      </div>
+      <div id="buyError" style="display:none;">
+        <div style="font-size:36px; margin-bottom:12px;">⚠</div>
+        <div class="buy-success-title" style="color:var(--orange);">Что-то пошло не так</div>
+        <div class="buy-success-sub" id="buyErrorMsg"></div>
+        <button type="button" class="btn" onclick="resetBuyModal()" style="margin-top:20px;">← Попробовать снова</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  // ─── Buy modal ───────────────────────────────────────────────────────────
+  (function setupBuy() {
+    const overlay = document.getElementById('buyOverlay');
+    const closeBtn = document.getElementById('buyClose');
+    const step1 = document.getElementById('buyStep1');
+    const step2 = document.getElementById('buyStep2');
+    if (!overlay) return;
+
+    // tariff index = plan*4 + period*2 + limit
+    const TARIFFS = [
+      {tier:'Стандарт', name:'Базовая свобода', price:200, per:'/ месяц', feats:['Серверы: NL · FR · PL','Протокол: TCP / Reality','Режим WARP','До 5 устройств одновременно','Безлимитный трафик']},
+      {tier:'Стандарт', name:'Базовая свобода', price:200, per:'/ месяц', feats:['Серверы: NL · FR · PL','Протокол: TCP / Reality','Режим WARP','Трафик: 210 ГБ / месяц','Без ограничения по устройствам']},
+      {tier:'Стандарт', name:'Базовая свобода', price:1920, per:'/ год · 160 ₽/мес', feats:['Серверы: NL · FR · PL','Протокол: TCP / Reality','Режим WARP','До 5 устройств одновременно','Безлимитный трафик','Экономия 20%']},
+      {tier:'Стандарт', name:'Базовая свобода', price:1920, per:'/ год · 160 ₽/мес', feats:['Серверы: NL · FR · PL','Протокол: TCP / Reality','Режим WARP','Трафик: 210 ГБ/мес (2520 ГБ за год)','Без ограничения по устройствам','Экономия 20%']},
+      {tier:'Максимальный', name:'Полный арсенал', price:400, per:'/ месяц', feats:['Серверы: NL · FR · PL + RU','Протоколы: WS + TCP / Reality','Режим WARP','Маскировка через Cloudflare','До 15 устройств одновременно','Безлимитный трафик']},
+      {tier:'Максимальный', name:'Полный арсенал', price:400, per:'/ месяц', feats:['Серверы: NL · FR · PL + RU','Протоколы: WS + TCP / Reality','Режим WARP','Маскировка через Cloudflare','Трафик: 1000 ГБ / месяц','Без ограничения по устройствам']},
+      {tier:'Максимальный', name:'Полный арсенал', price:3840, per:'/ год · 320 ₽/мес', feats:['Серверы: NL · FR · PL + RU','Протоколы: WS + TCP / Reality','Режим WARP','Маскировка через Cloudflare','До 15 устройств одновременно','Безлимитный трафик','Экономия 20%']},
+      {tier:'Максимальный', name:'Полный арсенал', price:3840, per:'/ год · 320 ₽/мес', feats:['Серверы: NL · FR · PL + RU','Протоколы: WS + TCP / Reality','Режим WARP','Маскировка через Cloudflare','Трафик: 1000 ГБ/мес (12 000 ГБ за год)','Без ограничения по устройствам','Экономия 20%']},
+    ];
+
+    let selPlan = 0, selPeriod = 0, selLimit = 0;
+    let promoCode = null, promoPercent = 0;
+    function tariffIdx() { return selPlan * 4 + selPeriod * 2 + selLimit; }
+
+    function updateCard() {
+      const t = TARIFFS[tariffIdx()];
+      document.getElementById('buyCardTier').textContent  = '/ ' + t.tier;
+      document.getElementById('buyCardName').textContent  = t.name;
+      const finalPrice = promoPercent > 0
+        ? Math.max(0, Math.round(t.price * (100 - promoPercent) / 100))
+        : t.price;
+      document.getElementById('buyCardPrice').textContent = finalPrice.toLocaleString('ru-RU');
+      document.getElementById('buyCardPer').textContent   = t.per;
+      const feats = document.getElementById('buyCardFeats');
+      feats.innerHTML = t.feats.map(f => '<div>' + f + '</div>').join('');
+    }
+
+    async function applyPromo() {
+      const inp = document.getElementById('buyPromo');
+      const msg = document.getElementById('buyPromoMsg');
+      const code = (inp.value || '').trim().toUpperCase();
+      if (!code) { promoCode = null; promoPercent = 0; msg.textContent = ''; updateCard(); return; }
+      msg.style.color = 'var(--dim)'; msg.textContent = 'Проверяем…';
+      try {
+        const resp = await fetch('/api/web/promo', {
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ code: code, tariff_idx: tariffIdx() }),
+        });
+        const data = await resp.json();
+        if (data.valid && data.type === 'referral') {
+          // реферальный код: скидки нет, но бонусные дни получат оба
+          promoCode = data.code; promoPercent = 0;
+          msg.style.color = 'var(--green)';
+          msg.textContent = '✓ Реферальный код принят — бонусные дни тебе и другу';
+        } else if (data.valid) {
+          promoCode = data.code; promoPercent = data.percent;
+          msg.style.color = 'var(--green)';
+          msg.textContent = '✓ Промокод применён: −' + data.percent + '%';
+        } else {
+          promoCode = null; promoPercent = 0;
+          msg.style.color = 'var(--orange)';
+          msg.textContent = data.reason || 'Код недействителен';
+        }
+      } catch(e) {
+        promoCode = null; promoPercent = 0;
+        msg.style.color = 'var(--orange)';
+        msg.textContent = 'Не удалось проверить промокод';
+      }
+      updateCard();
+    }
+
+    function syncSeg(segId, attr, val) {
+      document.getElementById(segId).querySelectorAll('button[data-' + attr + ']').forEach(b => {
+        b.classList.toggle('act', parseInt(b.dataset[attr]) === val);
+      });
+    }
+    function syncAll() {
+      syncSeg('buySeg1','plan',selPlan); syncSeg('buySeg2','period',selPeriod); syncSeg('buySeg3','limit',selLimit);
+      updateCard();
+    }
+
+    window.openBuyModal = function(plan) {
+      selPlan = plan || 0; selPeriod = 0; selLimit = 0;
+      promoCode = null; promoPercent = 0;
+      var pin = document.getElementById('buyPromo'); if (pin) pin.value = '';
+      var pmsg = document.getElementById('buyPromoMsg'); if (pmsg) pmsg.textContent = '';
+      window.resetBuyModal();
+      syncAll();
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
+    };
+
+    window.closeBuyModal = function() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    };
+
+    window.resetBuyModal = function() {
+      step1.style.display = ''; step2.style.display = 'none';
+    };
+
+    closeBtn.addEventListener('click', closeBuyModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeBuyModal(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && overlay.classList.contains('open')) closeBuyModal();
+    });
+
+    document.getElementById('buySeg1').addEventListener('click', e => {
+      const b = e.target.closest('button[data-plan]');
+      if (b) { selPlan = parseInt(b.dataset.plan); syncAll(); }
+    });
+    document.getElementById('buySeg2').addEventListener('click', e => {
+      const b = e.target.closest('button[data-period]');
+      if (b) { selPeriod = parseInt(b.dataset.period); syncAll(); }
+    });
+    document.getElementById('buySeg3').addEventListener('click', e => {
+      const b = e.target.closest('button[data-limit]');
+      if (b) { selLimit = parseInt(b.dataset.limit); syncAll(); }
+    });
+
+    document.getElementById('buyPromoApply').addEventListener('click', applyPromo);
+    document.getElementById('buyPromo').addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); applyPromo(); }
+    });
+
+    async function startPayment(method) {
+      const idx = tariffIdx();
+      step1.style.display = 'none'; step2.style.display = '';
+      document.getElementById('buyLoading').style.display = '';
+      document.getElementById('buySuccess').style.display = 'none';
+      document.getElementById('buyError').style.display = 'none';
+      try {
+        const resp = await fetch('/api/web/payment', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ tariff_idx: idx, method: method || null, promo: promoCode, ref: getRef() }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Ошибка');
+        // Промокод на 100% — подписка выдана сразу, без оплаты
+        if (data.status === 'succeeded') {
+          showSuccess(data.sub_url, data.claim_url);
+          return;
+        }
+        if (!data.payment_url) throw new Error(data.error || 'Нет ссылки оплаты');
+        localStorage.setItem('axiom_pid', data.payment_id);
+        window.location.href = data.payment_url;
+      } catch(e) {
+        document.getElementById('buyLoading').style.display = 'none';
+        document.getElementById('buyError').style.display = '';
+        document.getElementById('buyErrorMsg').textContent = e.message || 'Неизвестная ошибка';
+      }
+    }
+
+    document.getElementById('buyBtnCard').addEventListener('click', () => startPayment(null));
+    document.getElementById('buyBtnSbp').addEventListener('click',  () => startPayment('sbp'));
+
+    document.getElementById('buyCopyBtn').addEventListener('click', () => {
+      const url = document.getElementById('buySubUrl').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('buyCopyBtn');
+        btn.style.color = 'var(--green)';
+        setTimeout(() => btn.style.color = '', 1500);
+      });
+    });
+
+    function showSuccess(subUrl, claimUrl) {
+      document.getElementById('buyLoading').style.display = 'none';
+      document.getElementById('buyError').style.display = 'none';
+      document.getElementById('buySuccess').style.display = '';
+      document.getElementById('buySubUrl').textContent = subUrl;
+      var claimBtn = document.getElementById('buyClaimBtn');
+      if (claimBtn) claimBtn.href = claimUrl || 'https://t.me/BUY_BOT';
+      step1.style.display = 'none'; step2.style.display = '';
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function pollStatus(pid, attempts) {
+      if (attempts > 20) {
+        document.getElementById('buyLoading').style.display = 'none';
+        document.getElementById('buyError').style.display = '';
+        document.getElementById('buyErrorMsg').textContent = 'Оплата не подтверждена за 40 секунд. Если деньги списались — напиши в поддержку @SUPPORT_BOT';
+        localStorage.removeItem('axiom_pid');
+        return;
+      }
+      fetch('/api/web/status?pid=' + encodeURIComponent(pid))
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'succeeded') {
+            localStorage.removeItem('axiom_pid');
+            showSuccess(data.sub_url, data.claim_url);
+          } else if (data.status === 'canceled') {
+            localStorage.removeItem('axiom_pid');
+            document.getElementById('buyLoading').style.display = 'none';
+            document.getElementById('buyError').style.display = '';
+            document.getElementById('buyErrorMsg').textContent = 'Платёж отменён. Попробуй ещё раз.';
+          } else {
+            setTimeout(() => pollStatus(pid, attempts + 1), 2000);
+          }
+        })
+        .catch(() => setTimeout(() => pollStatus(pid, attempts + 1), 3000));
+    }
+
+    // Реферальная ссылка ?ref=<id>: запоминаем в localStorage, чтобы передать в оплату.
+    // Переживает редирект на Платёжку и обратно (тот же origin axiom.DOMAIN).
+    function getRef() {
+      const v = localStorage.getItem('axiom_ref');
+      return (v && /^[0-9]{1,20}$/.test(v)) ? v : null;
+    }
+    (function captureRef() {
+      const r = new URLSearchParams(window.location.search).get('ref');
+      if (r && /^[0-9]{1,20}$/.test(r)) {
+        localStorage.setItem('axiom_ref', r);
+        const url = new URL(window.location.href);
+        url.searchParams.delete('ref');
+        history.replaceState({}, '', url.toString());
+      }
+    })();
+
+    // On page load: detect return from payment
+    (function checkReturn() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('paid')) return;
+      const pid = localStorage.getItem('axiom_pid');
+      if (!pid) return;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('paid');
+      history.replaceState({}, '', url.toString());
+      step1.style.display = 'none'; step2.style.display = '';
+      document.getElementById('buyLoading').style.display = '';
+      document.getElementById('buySuccess').style.display = 'none';
+      document.getElementById('buyError').style.display = 'none';
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      pollStatus(pid, 0);
+    })();
+
+    updateCard();
+  })();
+
+  // Expose closeCmp for compare modal buttons
+  window.closeCmp = function() {
+    const ov = document.getElementById('cmpOverlay');
+    if (ov) { ov.classList.remove('open'); document.body.style.overflow = ''; }
+  };
+</script>
+
+</body>
+</html>
