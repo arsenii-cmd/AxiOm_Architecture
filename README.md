@@ -1,7 +1,17 @@
-# AxiOm — бот покупок VPN + архитектура
+# AxiOm — VPN sales bot + architecture
 
-Приватный репозиторий проекта **AxiOm VPN**: исходники Telegram-бота покупок и полная
-техническая документация инфраструктуры.
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Python](https://img.shields.io/badge/python-3.12-green)
+
+**AxiOm VPN** — privacy infrastructure built on a Marzneshin panel, multi-node device
+limiter (V3IpLimit), Telegram sales/support bots and a Flutter client. This repository holds
+the Telegram sales bot source and the full technical architecture reference of the system.
+
+> 🌍 *English:* the code comments and docs are in Russian; the architecture overview
+> ([`AxiOm_Architecture.md`](AxiOm_Architecture.md)) is the single source of truth for the
+> whole system (servers, panel, device limiter, tariffs, payments, referrals).
+
+Исходники Telegram-бота покупок и полная техническая документация инфраструктуры.
 
 > 📖 **Полное описание системы** (серверы, Marzban, V3IpLimit, тарифы, оплата, рефералы,
 > напоминания, история изменений) — в [`AxiOm_Architecture.md`](AxiOm_Architecture.md).
@@ -20,8 +30,7 @@
 | `cleanup_orphans.py` | Утилита чистки БД от «сирот» (подписок, удалённых из Marzban) |
 | `requirements.txt` | Зависимости Python |
 | `landing/` | Лендинг `axiom.DOMAIN` (веб-покупки + реферал `?ref`). Деплой: `scp` на RU `/var/www/landing/` |
-| `design/` | Дизайн-сайт `design.DOMAIN` (RU `/var/www/design/`): `index.html` + `offer.html`. Бэкенд формы — `/opt/design-backend/` (вне репо) |
-| `v3iplimit/` | IP-лимитер / device-limit (форк V2IpLimit). Работает на **NL** `/opt/v3iplimit/`, конфиг — `/root/config.json` (вне репо). См. §6 архитектуры |
+| `v3iplimit/` | IP-лимитер / device-limit (форк V2IpLimit, MIT). Работает на **NL** `/opt/v3iplimit/`, конфиг — `/root/config.json` (вне репо). См. §6 архитектуры |
 | `AxiOm_Architecture.md` | Архитектура всей системы |
 
 **Не в репозитории** (исключены `.gitignore`): `.env` и `config.json` (секреты), `bot.db`
@@ -125,3 +134,13 @@ ssh -p 2222 root@IP_RU "systemctl restart vpn-bot && journalctl -u vpn-bot -n 5 
 - Секреты живут **только** в `.env` на сервере (и у владельца). В репозитории их нет —
   не добавляйте их даже временно.
 - `bot.db` — персональные данные пользователей, в репозиторий не попадает.
+
+---
+
+## License
+
+This project is released under the [MIT License](LICENSE).
+
+The bundled `v3iplimit/` directory is a fork of
+[V2IpLimit](https://github.com/houshmand-2005/V2IpLimit) and retains its own MIT license
+(`v3iplimit/LICENSE`, © 2023 Houshmand).
