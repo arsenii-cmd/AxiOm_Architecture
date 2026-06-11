@@ -324,6 +324,7 @@ async def payment_webhook(request: web.Request) -> web.Response:
         if p.get("status") == "succeeded" and p.get("paid"):
             try:
                 await web_api.issue_web_subscription(payment_id)
+                print(f"✅ webhook(web): выдана подписка по {payment_id}")
             except Exception as e:
                 print(f"❌ webhook(web): issue_web_subscription: {e}")
                 return web.Response(status=500)
@@ -2014,6 +2015,40 @@ async def reminder_loop() -> None:
         await asyncio.sleep(REMINDER_INTERVAL)
 
 
+WEB_PAYMENT_POLL_INTERVAL = 600   # как часто добирать застрявшие веб-оплаты (секунды)
+
+
+async def web_payment_reconcile() -> None:
+    """Страховка от недоставленного webhook'а: добирает веб-оплаты, застрявшие
+    в pending дольше 15 мин. Сверяет статус в Платёжке и довыдаёт оплаченные
+    (issue_web_subscription идемпотентен — гонку с webhook разводит CAS)."""
+    for payment_id in db.get_stale_pending_web_payments(15):
+        try:
+            p = await get_payment(payment_id)
+        except Exception as e:
+            print(f"❌ reconcile: не смог проверить {payment_id}: {e}")
+            continue
+        status = p.get("status")
+        if status == "succeeded" and p.get("paid"):
+            try:
+                await web_api.issue_web_subscription(payment_id)
+                print(f"✅ reconcile: довыдана веб-подписка по {payment_id} (webhook не дошёл)")
+            except Exception as e:
+                print(f"❌ reconcile: выдача {payment_id}: {e}")
+        elif status == "canceled":
+            db.update_web_payment(payment_id, "canceled")
+
+
+async def web_payment_poll_loop() -> None:
+    await asyncio.sleep(30)  # дать боту подняться
+    while True:
+        try:
+            await web_payment_reconcile()
+        except Exception as e:
+            print(f"❌ web_payment_poll_loop: {e}")
+        await asyncio.sleep(WEB_PAYMENT_POLL_INTERVAL)
+
+
 # ── Запуск ───────────────────────────────────────────────────────────────────
 
 async def start_webhook_server():
@@ -2035,6 +2070,7 @@ async def main():
     ])
     await start_webhook_server()
     asyncio.create_task(reminder_loop())
+    asyncio.create_task(web_payment_poll_loop())
     print(f"🚀 {config.BOT_NAME} запущен")
     await dp.start_polling(bot)
 

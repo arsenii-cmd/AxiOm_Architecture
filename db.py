@@ -296,6 +296,18 @@ def get_web_payment(payment_id: str) -> dict:
         return dict(row) if row else {}
 
 
+def get_stale_pending_web_payments(min_age_minutes: int = 15) -> list[str]:
+    """payment_id веб-оплат, застрявших в pending дольше min_age_minutes.
+    Страховка на случай недоставленного webhook'а — фоновый поллинг добирает их."""
+    with sqlite3.connect(DB_PATH) as conn:
+        rows = conn.execute(
+            "SELECT payment_id FROM web_payments WHERE status = 'pending' "
+            "AND created_at <= datetime('now', ?)",
+            (f"-{int(min_age_minutes)} minutes",)
+        ).fetchall()
+        return [r[0] for r in rows]
+
+
 def update_web_payment(payment_id: str, status: str, sub_url: str = None):
     with sqlite3.connect(DB_PATH) as conn:
         if sub_url:
