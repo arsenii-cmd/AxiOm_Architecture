@@ -659,6 +659,15 @@ APK с `splits{abi}`: `app-arm64-v8a-release.apk` (~93 МБ, основной), 
 | `AxiOm_APP_Windows` | `AxiOm.exe` + DLL + `data/` (portable, всю папку держать вместе) | `AxiOm_APP_v2` (Windows desktop) |
 | `Tejar` | `Tejar-standalone.apk` | `D:\Creativ\TG\telegram-android` (см. §10) |
 
+**Распространение через GitHub Releases (21.06.2026):** готовые сборки выложены в Releases, чтобы качались с лендинга без Telegram. Прямая ссылка `releases/latest/download/<file>` отдаёт `Content-Disposition: attachment` → файл качается сразу, без перехода на GitHub.
+
+| Репозиторий | Тег | Ассеты |
+|---|---|---|
+| `arsenii-cmd/AxiOm-v2` | `v1.0.0` | `AxiOm-android-arm64.apk` (118 МБ, совр. телефоны), `AxiOm-android-universal.apk` (337 МБ, fat APK со всеми ABI incl armeabi-v7a для старых), `AxiOm-Windows.zip` (48 МБ, 64-бит) |
+| `arsenii-cmd/Tejar` | `v1.0.0` | `Tejar.apk` (392 МБ, standalone) |
+
+На лендинге (секция «Продукты») кнопки скачивания ведут на эти прямые ссылки + добавлены ссылки «Исходный код» на репозитории (карточки + футер). Windows только 64-бит (Flutter не собирает 32-бит).
+
 ---
 
 ## 10. Tejar
@@ -793,7 +802,7 @@ cd /opt/marzban && docker compose logs -f   # логи
 | Webhook Платёжкы | `https://pay.DOMAIN/payment/webhook` | RU (`IP_RU:2222`) | Caddy → `localhost:8080` (внутри `vpn-bot`) |
 | Nextcloud/WebDAV | `https://cloud.DOMAIN` | FR (`IP_FR`) | Caddy → `:8765` (отвечает 401-auth) |
 
-> ⚠️ На FR в Caddy остался **неиспользуемый** блок `axiom.DOMAIN` (старая копия `/var/www/landing`, ~130 КБ) — DNS на него больше не указывает.
+> Лендинг существует **только на RU**. Дубль на FR (неиспользуемый блок `axiom.DOMAIN` + старая копия `/var/www/landing`) **удалён 21.06.2026** — блок убран из FR Caddyfile (`caddy reload`), папка снесена.
 
 Все сайты обслуживаются Caddy с автоматическими Let's Encrypt сертификатами.
 
@@ -822,6 +831,14 @@ scp -P 2222 "D:/Creativ/AxiOm (1)/Design Master (1)/index.html" "D:/Creativ/AxiO
 ---
 
 ## 17. История изменений
+
+### 21.06.2026 — Скачивание клиентов с сайта через GitHub Releases + чистка FR
+
+- **Проблема:** скачать клиента можно было только через Telegram-бота. Добавлена раздача с лендинга.
+- **GitHub Releases:** созданы релизы `v1.0.0` в `arsenii-cmd/AxiOm-v2` (Android arm64 + Android universal + Windows) и `arsenii-cmd/Tejar` (Tejar.apk). Прямые ссылки `releases/latest/download/<file>` отдают файл как вложение → качается без перехода на GitHub. Universal APK (337 МБ) — fat-сборка со всеми ABI, ставится и на старые телефоны (armeabi-v7a). См. §9.
+- **Лендинг (RU):** в секцию «Продукты» добавлены кнопки скачивания (карточки AxiOm и Tejar) + ссылки «Исходный код» на репозитории, GitHub-ссылки в футере. Бэкап на сервере `index.html.bak-<ts>`.
+- **Чистка FR:** удалён рудимент — неиспользуемый блок `axiom.DOMAIN` из FR Caddyfile (`caddy reload`) и старая копия `/var/www/landing`. Лендинг теперь существует только на RU. См. §15.
+- ⚠️ **Готч:** `axiom.DOMAIN` по DNS указывает на **RU** (`IP_RU`), а не FR. На FR был дубль-блок Caddy, который не получал трафика — правки там не видны в браузере. Всегда деплоить лендинг на RU.
 
 ### 11.06.2026 — Webhook ЮKassa + страховочный поллинг веб-оплат
 
