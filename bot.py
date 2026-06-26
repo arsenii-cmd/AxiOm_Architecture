@@ -2022,6 +2022,11 @@ async def web_payment_reconcile() -> None:
     """Страховка от недоставленного webhook'а: добирает веб-оплаты, застрявшие
     в pending дольше 15 мин. Сверяет статус в Платёжке и довыдаёт оплаченные
     (issue_web_subscription идемпотентен — гонку с webhook разводит CAS)."""
+    # Зависшие issuing (бот упал на полпути выдачи) возвращаем в pending — иначе
+    # они не реконсилятся никогда, а claim показывает «оплата не завершена».
+    reset = db.reset_stale_issuing_web_payments(15)
+    if reset:
+        print(f"♻️ reconcile: возвращено в pending из зависшего issuing: {reset}")
     for payment_id in db.get_stale_pending_web_payments(15):
         try:
             p = await get_payment(payment_id)

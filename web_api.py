@@ -141,7 +141,13 @@ async def _create_marzban_user(username: str, tariff_idx: int) -> str:
     t = config.TARIFFS[tariff_idx]
     result = await bot_module.create_user(username, t)
     if "detail" in result:
-        raise Exception(result["detail"])
+        # Юзер мог быть создан прошлой оборванной попыткой (таймаут ПОСЛЕ создания):
+        # тогда повтор ловит 409. Это не ошибка — подтягиваем существующего.
+        existing = await bot_module.get_marzban_user(username)
+        if existing.get("username") and "detail" not in existing:
+            result = existing
+        else:
+            raise Exception(result["detail"])
     sub_url = result.get("subscription_url", f"{config.MARZNESHIN_URL}/sub/{username}")
 
     ip_limit = t.get("ip_limit", 0)

@@ -308,6 +308,22 @@ def get_stale_pending_web_payments(min_age_minutes: int = 15) -> list[str]:
         return [r[0] for r in rows]
 
 
+def reset_stale_issuing_web_payments(min_age_minutes: int = 15) -> int:
+    """Сбрасывает в pending веб-оплаты, зависшие в issuing дольше min_age_minutes
+    (бот упал между claim_web_issue и update_web_payment(succeeded) — иначе такая
+    запись не реконсилится никогда: get_stale_pending_web_payments берёт только pending,
+    а claim показывает «оплата не завершена»). Реальная выдача длится секунды, поэтому
+    issuing старше 15 мин — гарантированно мёртвая. Возвращает число сброшенных."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "UPDATE web_payments SET status = 'pending' WHERE status = 'issuing' "
+            "AND created_at <= datetime('now', ?)",
+            (f"-{int(min_age_minutes)} minutes",)
+        )
+        conn.commit()
+        return cur.rowcount
+
+
 def update_web_payment(payment_id: str, status: str, sub_url: str = None):
     with sqlite3.connect(DB_PATH) as conn:
         if sub_url:
