@@ -1,6 +1,6 @@
 # AxiOm — состояние системы после переезда на Marzneshin
 
-> Актуально на **08.06.2026**. Единый источник истины по тому, **что есть сейчас**
+> Актуально на **08.06.2026**, обновлено **26.06.2026** (DPI-фикс: транспорт `[tcp]` Reality → XHTTP+TLS, см. §2). Единый источник истины по тому, **что есть сейчас**
 > после миграции с Marzban на Marzneshin. Секреты тут не хранятся (пароли/ключи/токены —
 > в `.env` на серверах и в авто-памяти).
 >
@@ -29,19 +29,36 @@ iptables-persistent на RU не стоит). Новой ноде правило
 
 | Нода | IP | backend | Протоколы | Статус |
 |---|---|---|---|---|
-| France (local) | IP_FR | grpcio | VLESS WS + Reality + HY2 | healthy |
-| Poland | IP_PL | grpclib | VLESS WS + Reality + HY2 | healthy |
-| Netherlands | IP_NL | grpclib | VLESS WS + Reality + HY2 | healthy |
-| Russia | IP_RU | grpclib | **только VLESS WS** | healthy |
+| France (local) | IP_FR | grpcio | VLESS WS + XHTTP+TLS + HY2 | healthy |
+| Poland | IP_PL | grpclib | VLESS WS + XHTTP+TLS + HY2 | healthy |
+| Netherlands | IP_NL | grpclib | VLESS WS + XHTTP+TLS + HY2 | healthy |
+| Russia | IP_RU | grpclib | **VLESS WS + XHTTP+TLS** | healthy |
 
-**Инбаунды** (12 = 4 ноды × 3): VLESS_WS / VLESS_Reality / HY2 на каждой (на RU Reality/HY2 отключены).
+**Транспорт `[tcp]` (26.06.2026): Reality → XHTTP+TLS.** DPI 3-го поколения в РФ начал резать
+VLESS+Reality (поведенческий анализ) — слот `[tcp]` перестал работать. На всех нодах добавлены
+xhttp-инбаунды (порт `2087`, `network:xhttp`, `security:tls`, путь `/xhvless`, серт Let's Encrypt
+`fr.DOMAIN`); хосты `[tcp]` переключены на них, старые reality-хосты отключены. DPI видит легитимный
+HTTPS к реальному домену. **Пересборка клиента НЕ потребовалась** — текущее ядро тянет xhttp+tls;
+прошлый диагноз «version-lock» был ложным (блокером была reality, не версия xray).
+⚠️ Готчи: `fp=chrome` в vless-ссылке ломает xhttp-downstream → fingerprint пустой; reality
+несовместима с xhttp; клиент обязан включить тумблер **«Use xray-core when possible»** (для
+существующих сборок — рассылка/инструкция). Правило подписки `^HiddifyNextX → base64-links`.
+**Удалённые ноды:** xhttp-инбаунд задаётся **через панель** (`GET`→правка→`PUT /api/nodes/{id}/xray/config`),
+а не правкой файла — иначе инбаунд не регистрируется для пуша юзеров (на локальной FR правка файла работает).
+
+**Инбаунды:** VLESS_WS / VLESS_Reality / VLESS_XHTTP / HY2 на нодах (reality-инбаунды живы, но
+их хосты отключены — слот `[tcp]` обслуживает xhttp). RU: WS + XHTTP, без Reality/HY2.
 
 **Сервисы Marzneshin:**
-- **Standard** (id=1) — VLESS Reality на FR/PL/NL (без RU).
-- **Maximum** (id=2) — VLESS WS + Reality + HY2 на FR/PL/NL + **VLESS WS на RU**.
+- **Standard** (id=1) — VLESS `[tcp]` (XHTTP+TLS) на FR/PL/NL (без RU).
+- **Maximum** (id=2) — VLESS WS + `[tcp]` (XHTTP+TLS) + HY2 на FR/PL/NL + **WS + `[tcp]` на RU**.
 
-**Почему RU только WS:** умная маршрутизация .ru заворачивает ответы с публичного IP в
-WG-туннель на NL → Reality/HY2 (особенно UDP) ломаются асимметрией; WS идёт через Cloudflare и работает.
+**Почему RU без HY2:** умная маршрутизация .ru заворачивает ответы с публичного IP в
+WG-туннель на NL → UDP-протоколы (HY2) ломаются асимметрией; WS (Cloudflare) и xhttp+tls работают.
+
+**Продление серта `[tcp]`:** все ноды используют один серт `fr.DOMAIN`. systemd-timer
+`marznode-cert-sync.timer` (daily) на FR раздаёт обновлённый Let's Encrypt-серт с Caddy на все ноды
+по SSH (только при изменении) + рестартит marznode. Без него серт ротировался бы ~раз в 60 дней.
 
 **HY2:** UDP `9444`, TLS (Let's Encrypt `fr.DOMAIN`) + обфускация Salamander.
 ⚠️ Готч: рестарт удалённой marznode теряет sing-box (HY2) юзеров — восстанавливает только
@@ -183,8 +200,10 @@ data_limit / персональный IP-лимит (из старого `/root/
 ## 8. Клиент AxiOm v2
 
 Добавлен каскадный селектор Страна → **Протокол** (VLESS/Hysteria2) → Транспорт.
-Парсер remark: `^(.*?)\s*\([^)]*\)\s*\[([a-z0-9]+)\]\s*$`; токен → `ws`=VLESS/WS, `tcp`=VLESS/Reality,
+Парсер remark: `^(.*?)\s*\([^)]*\)\s*\[([a-z0-9]+)\]\s*$`; токен → `ws`=VLESS/WS, `tcp`=VLESS/XHTTP+TLS
+(до 26.06.2026 — Reality; транспорт сменился на сервере без пересборки клиента, токен `[tcp]` сохранён),
 `hy2`=Hysteria2. **Сервер виден в селекторе только если remark = `<АнглСтрана> (текст) [ws|tcp|hy2]`.**
+⚠️ Для туннелирования xhttp клиент должен включить тумблер **«Use xray-core when possible»** (Настройки→Общие).
 
 **Счётчик устройств (08.06):** `device_count_provider.dart` `_baseUrl` → `fr.DOMAIN/devices`;
 ключ передаётся при сборке `--dart-define=DEVICE_API_KEY=<key>` (в коде не хранится — иначе счётчик
