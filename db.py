@@ -228,17 +228,45 @@ def init_web_payments():
             conn.execute("ALTER TABLE web_payments ADD COLUMN referrer_id INTEGER")
         if "bonus_granted" not in wcols:
             conn.execute("ALTER TABLE web_payments ADD COLUMN bonus_granted INTEGER DEFAULT 0")
+        # Telegram-id покупателя, если он покупал залогиненным (для авто-привязки)
+        if "buyer_tg" not in wcols:
+            conn.execute("ALTER TABLE web_payments ADD COLUMN buyer_tg INTEGER")
         conn.execute("CREATE INDEX IF NOT EXISTS idx_web_claim_token ON web_payments(claim_token)")
         conn.commit()
 
 
-def save_web_payment(payment_id: str, tariff_idx: int, marzban_username: str, claim_token: str = None, promo_code: str = None, referrer_id: int = None):
+def save_web_payment(payment_id: str, tariff_idx: int, marzban_username: str, claim_token: str = None, promo_code: str = None, referrer_id: int = None, buyer_tg: int = None):
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute(
-            "INSERT OR IGNORE INTO web_payments (payment_id, tariff_idx, marzban_username, claim_token, promo_code, referrer_id) VALUES (?, ?, ?, ?, ?, ?)",
-            (payment_id, tariff_idx, marzban_username, claim_token, promo_code, referrer_id)
+            "INSERT OR IGNORE INTO web_payments (payment_id, tariff_idx, marzban_username, claim_token, promo_code, referrer_id, buyer_tg) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (payment_id, tariff_idx, marzban_username, claim_token, promo_code, referrer_id, buyer_tg)
         )
         conn.commit()
+
+
+def set_web_buyer_tg(payment_id: str, telegram_id: int):
+    """Бэкфилл Telegram-id покупателя (если покупал анонимно, а позже залогинился).
+    Ставит только если ещё пусто — не перетирает реального владельца."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "UPDATE web_payments SET buyer_tg = ? WHERE payment_id = ? AND buyer_tg IS NULL",
+            (telegram_id, payment_id)
+        )
+        conn.commit()
+
+
+def get_unclaimed_web_payments_with_tg(min_age_minutes: int = 10) -> list[dict]:
+    """succeeded веб-оплаты залогиненных покупателей (buyer_tg известен), которые так и
+    не привязались (claimed_by пуст) — для авто-привязки фоновым циклом (вариант C)."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT payment_id, buyer_tg FROM web_payments "
+            "WHERE status = 'succeeded' AND claimed_by IS NULL AND buyer_tg IS NOT NULL "
+            "AND created_at <= datetime('now', ?)",
+            (f"-{int(min_age_minutes)} minutes",)
+        ).fetchall()
+        return [dict(r) for r in rows]
 
 
 def get_web_payment_by_token(claim_token: str) -> dict:

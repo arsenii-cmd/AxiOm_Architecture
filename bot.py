@@ -824,6 +824,34 @@ async def claim_web_subscription(message: types.Message, user_id: int, token: st
     await show_cabinet(user_id, message, edit=False)
 
 
+async def bind_web_subscription(payment_id: str, telegram_id: int, notify: bool = True) -> bool:
+    """Привязывает оплаченную веб-покупку к Telegram-аккаунту без участия пользователя
+    (вариант A/C): пишет в subscriptions + ставит claimed_by. Идемпотентно через CAS
+    db.claim_web_payment. True — если привязка выполнена этим вызовом."""
+    wp = db.get_web_payment(payment_id)
+    if not wp or wp.get("status") != "succeeded":
+        return False
+    idx = wp.get("tariff_idx")
+    if not (isinstance(idx, int) and 0 <= idx < len(config.TARIFFS)):
+        return False
+    if not db.claim_web_payment(payment_id, telegram_id):
+        return False  # уже привязана (этим же или другим аккаунтом)
+    t = config.TARIFFS[idx]
+    db.add_subscription(telegram_id, wp["marzban_username"], t)
+    if notify:
+        try:
+            await bot.send_message(
+                telegram_id,
+                "✅ *Оплаченная на сайте подписка добавлена в твой аккаунт!*\n\n"
+                f"📦 {t['name']}\n\n"
+                "Она в личном кабинете — там трафик, срок, продление и удаление.",
+                parse_mode="Markdown",
+            )
+        except Exception as e:
+            print(f"⚠️ bind_web: уведомление {telegram_id} не доставлено: {e}")
+    return True
+
+
 @dp.callback_query(F.data == "back_to_menu")
 async def back_to_menu(callback: types.CallbackQuery):
     await callback.message.edit_text(
@@ -2044,11 +2072,24 @@ async def web_payment_reconcile() -> None:
             db.update_web_payment(payment_id, "canceled")
 
 
+async def web_claim_autobind() -> None:
+    """Вариант C: добор непривязанных succeeded-оплат залогиненных покупателей.
+    Страховка, если автопривязка в момент выдачи не прошла (бот лежал / сбой DM).
+    Анонимных покупателей (buyer_tg пуст) не трогает — их некуда привязать."""
+    for row in db.get_unclaimed_web_payments_with_tg(10):
+        try:
+            if await bind_web_subscription(row["payment_id"], row["buyer_tg"], notify=True):
+                print(f"🔗 autobind: привязана веб-подписка {row['payment_id']} → tg {row['buyer_tg']}")
+        except Exception as e:
+            print(f"❌ autobind {row['payment_id']}: {e}")
+
+
 async def web_payment_poll_loop() -> None:
     await asyncio.sleep(30)  # дать боту подняться
     while True:
         try:
             await web_payment_reconcile()
+            await web_claim_autobind()
         except Exception as e:
             print(f"❌ web_payment_poll_loop: {e}")
         await asyncio.sleep(WEB_PAYMENT_POLL_INTERVAL)

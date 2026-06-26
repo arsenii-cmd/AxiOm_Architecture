@@ -190,6 +190,13 @@ async def issue_web_subscription(payment_id: str) -> str:
     db.update_web_payment(payment_id, "succeeded", sub_url)
     # Реферальные бонусы (как в боте). Не должны ломать выдачу подписки — внутри try/except.
     await _grant_referral_bonus(wp)
+    # Вариант A: если покупал залогиненный — сразу привязываем к его Telegram-аккаунту.
+    if wp.get("buyer_tg"):
+        try:
+            import bot as bot_module
+            await bot_module.bind_web_subscription(payment_id, wp["buyer_tg"], notify=True)
+        except Exception as e:
+            print(f"⚠️ web autobind {payment_id}: {e}")
     return sub_url
 
 
@@ -256,11 +263,12 @@ async def handle_create_payment(request: web.Request) -> web.Response:
                 referrer_id = rid  # реф-код в поле промо приоритетнее ?ref
             else:
                 return _cors(web.json_response({"error": "Код недействителен или исчерпан"}, status=400), request)
+    # Telegram-id покупателя, если он покупает залогиненным (вариант A — автопривязка)
+    _sess = db.get_web_session(request.cookies.get("axiom_session"))
+    buyer_tg = _sess.get("telegram_id") if _sess else None
     # Самоприглашение: залогиненный покупатель не может применить свой же код/ссылку
-    if referrer_id:
-        _sess = db.get_web_session(request.cookies.get("axiom_session"))
-        if _sess and _sess.get("telegram_id") == referrer_id:
-            referrer_id = None
+    if referrer_id and buyer_tg == referrer_id:
+        referrer_id = None
     base_price = config.TARIFFS[tariff_idx]["price"]
     price = _discounted_price(base_price, promo["percent"]) if promo else base_price
     promo_code = promo["code"] if promo else None
@@ -272,7 +280,7 @@ async def handle_create_payment(request: web.Request) -> web.Response:
     # выдаём подписку сразу, минуя оплату.
     if price < 1:
         payment_id = "free_" + secrets.token_urlsafe(10)
-        db.save_web_payment(payment_id, tariff_idx, username, claim_token, promo_code, referrer_id)
+        db.save_web_payment(payment_id, tariff_idx, username, claim_token, promo_code, referrer_id, buyer_tg)
         try:
             sub_url = await _create_marzban_user(username, tariff_idx)
         except Exception as e:
@@ -281,6 +289,12 @@ async def handle_create_payment(request: web.Request) -> web.Response:
         if promo_code:
             db.incr_promo_use(promo_code)
         db.update_web_payment(payment_id, "succeeded", sub_url)
+        if buyer_tg:  # вариант A: залогинен — привязываем сразу
+            try:
+                import bot as bot_module
+                await bot_module.bind_web_subscription(payment_id, buyer_tg, notify=True)
+            except Exception as e:
+                print(f"⚠️ web autobind(free) {payment_id}: {e}")
         return _cors(web.json_response({
             "status": "succeeded", "free": True,
             "sub_url": sub_url, "claim_url": _claim_url(claim_token),
@@ -292,7 +306,7 @@ async def handle_create_payment(request: web.Request) -> web.Response:
         print(f"❌ web_api: create_payment error: {e}")
         return _cors(web.json_response({"error": str(e)}, status=502), request)
 
-    db.save_web_payment(payment_id, tariff_idx, username, claim_token, promo_code, referrer_id)
+    db.save_web_payment(payment_id, tariff_idx, username, claim_token, promo_code, referrer_id, buyer_tg)
     return _cors(web.json_response({"payment_id": payment_id, "payment_url": payment_url}), request)
 
 
@@ -307,6 +321,18 @@ async def handle_status(request: web.Request) -> web.Response:
         return _cors(web.json_response({"status": "not_found"}, status=404), request)
 
     if wp["status"] == "succeeded":
+        # Покупал анонимно, но сейчас открывает статус залогиненным и ещё не привязал —
+        # ловим момент и привязываем сразу (бэкфилл buyer_tg + вариант A).
+        if not wp.get("claimed_by"):
+            _sess = db.get_web_session(request.cookies.get("axiom_session"))
+            tg = _sess.get("telegram_id") if _sess else None
+            if tg:
+                db.set_web_buyer_tg(payment_id, tg)
+                try:
+                    import bot as bot_module
+                    await bot_module.bind_web_subscription(payment_id, tg, notify=True)
+                except Exception as e:
+                    print(f"⚠️ web autobind(status) {payment_id}: {e}")
         return _cors(web.json_response({
             "status": "succeeded", "sub_url": wp["sub_url"],
             "claim_url": _claim_url(wp.get("claim_token")),
