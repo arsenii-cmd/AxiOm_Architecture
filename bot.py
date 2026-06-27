@@ -131,7 +131,7 @@ WELCOME_TEXT = (
     f"*+{config.REFERRAL_BONUS_DAYS_YEAR} дн.* за годовой.\n"
     "Жми «🎁 Пригласить друга» и поделись своей ссылкой.\n"
     "━━━━━━━━━━━━━━━━━━\n"
-    "💬 *Сообщество:* @COMMUNITY\n\n"
+    "💬 *Сообщество:* @AxiOm\\_freedom\n\n"
     "👇 Выбери действие:"
 )
 
@@ -148,14 +148,14 @@ HELP_TEXT = (
     "• /help — эта справка\n\n"
     "━━━━━━━━━━━━━━━━━━\n"
     "🆘 *Проблемы с подключением?*\n"
-    "Напиши нам: @SUPPORT_BOT\n\n"
+    "Напиши нам: @AxiOm\\_Npv\\_support\\_bot\n\n"
     "━━━━━━━━━━━━━━━━━━\n"
     "🎁 *Реферальная программа*\n"
     "Приглашай друзей по своей ссылке и получай дни VPN бесплатно. "
     f"За каждую оплату друга: *+{config.REFERRAL_BONUS_DAYS} дн.* за месячный тариф, "
     f"*+{config.REFERRAL_BONUS_DAYS_YEAR} дн.* за годовой.\n"
     "Ссылка — в главном меню, кнопка «🎁 Пригласить друга».\n\n"
-    "💬 *Наше сообщество:* @COMMUNITY"
+    "💬 *Наше сообщество:* @AxiOm\\_freedom"
 )
 
 
@@ -793,7 +793,7 @@ async def claim_web_subscription(message: types.Message, user_id: int, token: st
     if not (isinstance(idx, int) and 0 <= idx < len(config.TARIFFS)):
         await message.answer(
             "⚠️ Тариф этой покупки больше недоступен. Напиши в поддержку: "
-            "@SUPPORT_BOT",
+            "@AxiOm\\_Npv\\_support\\_bot",
             parse_mode="Markdown",
         )
         return
@@ -1412,7 +1412,7 @@ async def renew_start(callback: types.CallbackQuery):
     if idx is None:
         await callback.message.edit_text(
             "⚠️ Тариф этой подписки больше недоступен для продления.\n"
-            "Напиши в поддержку: @SUPPORT_BOT",
+            "Напиши в поддержку: @AxiOm\\_Npv\\_support\\_bot",
             parse_mode="Markdown", reply_markup=back_kb())
         return
     t = config.TARIFFS[idx]
@@ -1712,7 +1712,7 @@ async def cancel_request(callback: types.CallbackQuery):
     await callback.message.edit_text(
         "❌ *Заявка отменена.*\n\n"
         "⚠️ Если вы уже перевели деньги — вернуть их можно только по заявке "
-        "в поддержку: @SUPPORT_BOT",
+        "в поддержку: @AxiOm\\_Npv\\_support\\_bot",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="◀️ В главное меню", callback_data="back_to_menu")]
@@ -1737,7 +1737,7 @@ async def reject_request(callback: types.CallbackQuery):
             user_id,
             "❌ *Ваша заявка отклонена администратором.*\n\n"
             "⚠️ Если вы переводили деньги — вернуть их можно только по заявке "
-            "в поддержку: @SUPPORT_BOT",
+            "в поддержку: @AxiOm\\_Npv\\_support\\_bot",
             parse_mode="Markdown",
         )
     except Exception as e:
