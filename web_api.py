@@ -15,7 +15,7 @@ import config
 import db
 
 # CORS-заголовки: лендинг и бот на одном домене, но на случай локальной разработки
-ALLOWED_ORIGIN = "https://axiom.DOMAIN"
+ALLOWED_ORIGIN = config.LANDING_URL
 
 
 def _claim_url(token: str) -> str:
@@ -58,7 +58,7 @@ def _client_ip(request: web.Request) -> str:
 
 def _cors(resp: web.Response, request: web.Request) -> web.Response:
     origin = request.headers.get("Origin", "")
-    if origin in (ALLOWED_ORIGIN, "https://design.DOMAIN"):
+    if origin in (ALLOWED_ORIGIN, config.DESIGN_ORIGIN):
         resp.headers["Access-Control-Allow-Origin"] = origin
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
@@ -108,7 +108,7 @@ async def _create_payment(tariff_idx: int, username: str, method: str = None, am
         "capture": True,
         "confirmation": {
             "type": "redirect",
-            "return_url": "https://design.DOMAIN/?axiom_paid=1",
+            "return_url": config.PAYMENT_RETURN_URL,
         },
         "description": f"Заказ №{order_no}",
         "metadata": {

@@ -21,7 +21,7 @@ SESSION_COOKIE = "axiom_session"
 SESSION_TTL_DAYS = 30
 AUTH_MAX_AGE = 86400  # подпись Telegram считается свежей в течение суток
 
-ALLOWED_ORIGINS = ("https://axiom.DOMAIN", "https://design.DOMAIN")
+ALLOWED_ORIGINS = (config.LANDING_URL, config.DESIGN_ORIGIN)
 
 
 def _cors(resp: web.Response, request: web.Request) -> web.Response:

@@ -239,6 +239,8 @@ PAYMENT_WEBHOOK_PORT = int(os.getenv("PAYMENT_WEBHOOK_PORT", "8080"))
 PAYMENT_WEBHOOK_PATH = "/payment/webhook"
 
 PAYMENT_RETURN_URL = os.getenv("PAYMENT_RETURN_URL", "https://design.DOMAIN/?paid=1")
+# Origin сайта design — для CORS веб-API (берётся из PAYMENT_RETURN_URL)
+DESIGN_ORIGIN = PAYMENT_RETURN_URL.split("?")[0].rstrip("/")
 
 # Привязка исходящего адреса при запросах к Платёжке (source-IP bind).
 # На RU-сервере локальный трафик без fwmark уходит в NL-тоннель, а Платёжка режет
