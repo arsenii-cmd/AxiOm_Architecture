@@ -43,6 +43,8 @@ def init_db():
             conn.execute("ALTER TABLE pending_payments ADD COLUMN fio TEXT")
         if "payment_id" not in pcols:
             conn.execute("ALTER TABLE pending_payments ADD COLUMN payment_id TEXT")
+        if "issuing" not in pcols:
+            conn.execute("ALTER TABLE pending_payments ADD COLUMN issuing INTEGER DEFAULT 0")
         scols = [r[1] for r in conn.execute("PRAGMA table_info(subscriptions)").fetchall()]
         if "tariff_code" not in scols:
             conn.execute("ALTER TABLE subscriptions ADD COLUMN tariff_code TEXT")
@@ -110,6 +112,25 @@ def set_trial_used(telegram_id: int):
         conn.commit()
 
 
+def claim_trial(telegram_id: int) -> bool:
+    """Атомарно резервирует пробный период (trial_used 0→1). True только у первого вызова —
+    защита от гонки даблклика. При неудачной выдаче откатить через set_trial_unused()."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "UPDATE users SET trial_used = 1 WHERE telegram_id = ? AND COALESCE(trial_used, 0) = 0",
+            (telegram_id,)
+        )
+        conn.commit()
+        return cur.rowcount == 1
+
+
+def set_trial_unused(telegram_id: int):
+    """Откат резерва триала (trial_used→0) — если выдача не удалась."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("UPDATE users SET trial_used = 0 WHERE telegram_id = ?", (telegram_id,))
+        conn.commit()
+
+
 def next_order_number() -> int:
     """Возвращает следующий сквозной номер заказа (для description в Платёжке)."""
     with sqlite3.connect(DB_PATH) as conn:
@@ -140,6 +161,40 @@ def get_pending(telegram_id: int) -> dict:
 def delete_pending(telegram_id: int):
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("DELETE FROM pending_payments WHERE telegram_id = ?", (telegram_id,))
+        conn.commit()
+
+
+def try_create_pending(telegram_id: int, marzban_username: str, tariff_idx: int) -> bool:
+    """Атомарно резервирует заявку на покупку (INSERT OR IGNORE по PK telegram_id).
+    False — если у юзера уже есть незавершённая заявка (защита от гонки даблклика «Купить»)."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "INSERT OR IGNORE INTO pending_payments (telegram_id, marzban_username, tariff_idx, is_renewal) "
+            "VALUES (?, ?, ?, 0)",
+            (telegram_id, marzban_username, tariff_idx)
+        )
+        conn.commit()
+        return cur.rowcount == 1
+
+
+def claim_pending_issue(telegram_id: int) -> bool:
+    """Атомарно «застолбляет» выдачу по заявке (issuing 0→1). True только у первого вызова —
+    защита от гонки webhook + кнопка «Проверить оплату» (оба зовут issue_subscription)."""
+    with sqlite3.connect(DB_PATH) as conn:
+        cur = conn.execute(
+            "UPDATE pending_payments SET issuing = 1 WHERE telegram_id = ? AND COALESCE(issuing, 0) = 0",
+            (telegram_id,)
+        )
+        conn.commit()
+        return cur.rowcount == 1
+
+
+def release_pending_issue(telegram_id: int):
+    """Снимает захват выдачи (issuing→0) — при ошибке, чтобы повтор мог взять заявку снова."""
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute(
+            "UPDATE pending_payments SET issuing = 0 WHERE telegram_id = ?", (telegram_id,)
+        )
         conn.commit()
 
 

@@ -260,17 +260,24 @@ async def issue_subscription(user_id: int) -> tuple[bool, str]:
     pending = db.get_pending(user_id)
     if not pending or pending.get("is_renewal"):
         return False, "no_pending"
+    # Атомарный захват: webhook и кнопка «Проверить оплату» могут зайти одновременно —
+    # выдаём ровно один раз (иначе дубль подписки и двойной реф-бонус).
+    if not db.claim_pending_issue(user_id):
+        return False, "in_progress"
     idx = pending["tariff_idx"]
     t = config.TARIFFS[idx]
     username = pending["marzban_username"]
 
-    result = await create_user(username, t)
-    if "detail" in result:
-        raise Exception(result["detail"])
-
-    sub_url = result.get("subscription_url", f"{config.MARZNESHIN_URL}/sub/{username}")
-    db.add_subscription(user_id, username, t)
-    db.delete_pending(user_id)
+    try:
+        result = await create_or_get_user(username, t)
+        if "detail" in result:
+            raise Exception(result["detail"])
+        sub_url = result.get("subscription_url", f"{config.MARZNESHIN_URL}/sub/{username}")
+        db.add_subscription(user_id, username, t)
+        db.delete_pending(user_id)
+    except Exception:
+        db.release_pending_issue(user_id)  # вернуть заявку для повтора
+        raise
 
     ip_limit = t.get("ip_limit", 0)
     if ip_limit and ip_limit > 0:
@@ -468,6 +475,17 @@ async def create_user(username: str, tariff: dict, expire_override: int = None) 
             headers={"Authorization": f"Bearer {token}"},
         )
         return _normalize_user(await r.json())
+
+
+async def create_or_get_user(username: str, tariff: dict, expire_override: int = None) -> dict:
+    """Создаёт юзера; если он уже есть (оборванная прошлая попытка → 409), подтягивает
+    существующего вместо ошибки. Делает повтор выдачи (webhook/кнопка) идемпотентным."""
+    result = await create_user(username, tariff, expire_override=expire_override)
+    if "detail" in result:
+        existing = await get_marzban_user(username)
+        if existing.get("username") and "detail" not in existing:
+            return existing
+    return result
 
 
 async def get_marzban_user(username: str) -> dict:
@@ -867,7 +885,8 @@ async def get_trial(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     db.add_user(user_id, callback.from_user.first_name or "")
 
-    if db.get_trial_used(user_id):
+    # Атомарный резерв триала (trial_used 0→1) — два быстрых клика не дадут два триала.
+    if not db.claim_trial(user_id):
         await callback.answer("Вы уже получали пробный период.", show_alert=True)
         try:
             await callback.message.edit_text(
@@ -894,7 +913,7 @@ async def get_trial(callback: types.CallbackQuery):
 
         sub_url = result.get("subscription_url", f"{config.MARZNESHIN_URL}/sub/{username}")
         db.add_subscription(user_id, username, t)
-        db.set_trial_used(user_id)
+        # trial_used уже выставлен атомарно claim_trial выше
 
         ip_limit = t.get("ip_limit", 0)
         if ip_limit and ip_limit > 0:
@@ -915,6 +934,7 @@ async def get_trial(callback: types.CallbackQuery):
             ]),
         )
     except Exception as e:
+        db.set_trial_unused(user_id)  # откат резерва — дать возможность повторить
         await callback.message.edit_text(
             f"❌ Не удалось активировать пробный период: {e}", reply_markup=back_kb())
 
@@ -1211,10 +1231,6 @@ async def buy(callback: types.CallbackQuery):
     t = config.TARIFFS[idx]
     user_id = callback.from_user.id
 
-    if db.get_pending(user_id):
-        await callback.answer("⏳ У тебя уже есть незавершённая заявка. Заверши или отмени её.", show_alert=True)
-        return
-
     # Username для Marzban: ник Telegram как основа, fallback — user_{id}
     tg_username = callback.from_user.username
     if tg_username:
@@ -1224,10 +1240,16 @@ async def buy(callback: types.CallbackQuery):
     # Marzneshin приводит username к нижнему регистру при создании — см. коммент в триале.
     username = f"{base}_{uuid.uuid4().hex[:4]}".lower()
 
+    # Атомарно резервируем заявку — даблклик не создаст вторую (и второй платёж).
+    if not db.try_create_pending(user_id, username, idx):
+        await callback.answer("⏳ У тебя уже есть незавершённая заявка. Заверши или отмени её.", show_alert=True)
+        return
+
     await callback.message.edit_text("⏳ Создаю ссылку на оплату...")
     try:
         payment_id, pay_url = await create_payment(user_id, idx, username)
     except Exception as e:
+        db.delete_pending(user_id)  # снять резерв при ошибке создания платежа
         print(f"❌ buy: не удалось создать платёж для {user_id}: {e}")
         await callback.message.edit_text(f"❌ Не удалось создать платёж: {e}", reply_markup=back_kb())
         return
@@ -1344,7 +1366,7 @@ async def confirm(callback: types.CallbackQuery):
 
     try:
         await callback.message.edit_text("⏳ Создаю подписку...")
-        result = await create_user(username, t)
+        result = await create_or_get_user(username, t)
 
         if "detail" in result:
             raise Exception(result["detail"])
