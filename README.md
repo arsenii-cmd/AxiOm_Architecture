@@ -32,6 +32,8 @@ the Telegram sales bot source and the full technical architecture reference of t
 | `landing/` | Лендинг `axiom.DOMAIN` (веб-покупки + реферал `?ref`). Деплой: `scp` на RU `/var/www/landing/` |
 | `v3iplimit/` | IP-лимитер / device-limit (форк V2IpLimit, MIT). Работает на **NL** `/opt/v3iplimit/`, конфиг — `/root/config.json` (вне репо). См. §6 архитектуры |
 | `AxiOm_Architecture.md` | Архитектура всей системы |
+| `MARZNESHIN_STATE.md` | Актуальное состояние панели Marzneshin (ноды, сервисы, протоколы, Naive-прокси) |
+| `NAIVE_PROXY.md` | Naive-прокси (gost): архитектура, патчи панели, деплой на ноду — пошаговый гайд |
 
 **Не в репозитории** (исключены `.gitignore`): `.env` и `config.json` (секреты), `bot.db`
 (живые данные), `venv/`, `__pycache__/`, локальные бэкапы `bak-*`.
